@@ -34,7 +34,7 @@ Integration tests require you to set environment variables `S3_KEY`, `S3_SECRET`
 
  - `time docker-compose -f docker-compose-integration-tests.yml run -w /code test lein test :integration`
 
-If the bucket is not empty, tests will still pass, but it may take a long time to clear them. The AWS command-line tools provide a quick parallel way to empty a bucket.
+If the bucket is not empty, tests will still pass, but it may take a long time to clear the bucket. The AWS command-line tools provide a quick parallel way to empty a bucket:
 
  - `aws s3 rm --region «REGION» --recursive s3://«BUCKET»`
 
