@@ -57,8 +57,8 @@
       (.get conn (add-prefix prefix k))))
 
   (set-string [this k v]
-    (with-open [ conn (get-connection pool db-number)]
-    (.set conn (add-prefix prefix k) v)))
+    (with-open [conn (get-connection pool db-number)]
+      (.set conn (add-prefix prefix k) v)))
 
   (keys-matching-prefix [this the-prefix]
     ; Because we add a prefix to everything in Redis, we need to add that first.
@@ -73,7 +73,8 @@
           all-unique-keys)))
 
   (delete [this k]
-    (.del this (add-prefix prefix k)))
+    (with-open [conn (get-connection pool db-number)]
+      (.del conn (add-prefix prefix k))))
 
   Redis
   (set-string-and-expiry [this k milliseconds v]

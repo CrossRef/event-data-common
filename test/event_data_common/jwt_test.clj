@@ -63,3 +63,46 @@
     (is
       (= nil (:jwt-claims wrapped-bad))
       "Invalid token ignored.")))))
+
+(deftest ^:unit get-token
+  (testing "Get-token should retrieve the token from a request."
+    (is (= "abcdefgh" (server/get-token
+                        {:remote-addr "172.17.0.1",
+                         :headers {
+                           "accept" "*/*",
+                           "authorization" "Bearer abcdefgh",
+                           "host" "localhost:9990",
+                           "user-agent" "curl/7.49.1"},
+                         :uri "/heartbeat",
+                         :server-name "localhost",
+                         :body nil,
+                         :scheme :http,
+                         :request-method :get}))))
+
+  (testing "Get-token should return nil if not present."
+    (is (= nil (server/get-token
+                {:remote-addr "172.17.0.1",
+                 :headers {
+                   "accept" "*/*",
+                   "authorization" "",
+                   "host" "localhost:9990",
+                   "user-agent" "curl/7.49.1"},
+                 :uri "/heartbeat",
+                 :server-name "localhost",
+                 :body nil,
+                 :scheme :http,
+               :request-method :get}))))
+
+    (testing "Get-token should return nil if malformed."
+      (is (= nil (server/get-token 
+                  {:remote-addr "172.17.0.1",
+                   :headers {
+                     "accept" "*/*",
+                     "authorization" "Token abcdefgh",
+                     "host" "localhost:9990",
+                     "user-agent" "curl/7.49.1"},
+                   :uri "/heartbeat",
+                   :server-name "localhost",
+                   :body nil,
+                   :scheme :http,
+                   :request-method :get})))))

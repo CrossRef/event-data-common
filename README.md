@@ -2,6 +2,10 @@
 
 Common components for various services of Event Data. Tests run in Docker, but this is distributed as a Clojure library.
 
+## To use
+
+    [event-data-common "0.1.2"]
+
 ## Components
 
 ### Storage
@@ -36,7 +40,7 @@ Integration tests require you to set environment variables `S3_KEY`, `S3_SECRET`
 
 If the bucket is not empty, tests will still pass, but it may take a long time to clear the bucket. The AWS command-line tools provide a quick parallel way to empty a bucket:
 
- - `aws s3 rm --region «REGION» --recursive s3://«BUCKET»`
+ - `source .env && aws s3 rm --region $S3_REGION_NAME --recursive s3://$S3_BUCKET_NAME`
 
 All tests:
 
@@ -66,7 +70,7 @@ The following configuration keys must be set in any code that uses these librari
 To distribute:
 
  1. Tag release
- 2. `lein release clojars`
+ 2. `lein deploy clojars`
 
 ## License
 

@@ -24,6 +24,23 @@
       (store/set-string conn k v)
       (is (= v (store/get-string conn k)) "Correct value returned"))))
 
+(deftest ^:component set-delete-and-get
+  (testing "Key can be set and deleted retrieved."
+    (let [k "this is my key2"
+          v "this is my value2"
+          ; build a redis connection with the present configuration.
+          conn (build)]
+
+      (is (nil? (store/get-string conn k)) "Key should not exist before.")
+
+      (store/set-string conn k v)
+
+      (is (= v (store/get-string conn k)) "Key exists after setting")
+
+      (store/delete conn k)
+
+      (is (nil? (store/get-string conn k)) "Key should not exist after deletion."))))
+
 (deftest ^:component setex-and-get
   (testing "Key can be set with expiry and retrieved."
     (let [ki "this is my immediately expiring key"
