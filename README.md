@@ -16,10 +16,6 @@ Implementation of storage for Redis.
 
 Implementation of storage for AWS S3.
 
-### Status Reporting
-
-Report to the Status Service.
-
 ### JWT verification
 
 Verify that a JWT has been passed into a header. More than one secret can be supplied in configuration.
@@ -55,6 +51,7 @@ These have the same requisites for integration tests.
 The following configuration keys must be set in any code that uses these libraries:
 
 | Environment variable | Description                         | Default | Required for  |
+|----------------------|-------------------------------------|---------|---------------|
 | `REDIS_HOST`         | Redis host                          |         | Redis storage |
 | `REDIS_PORT`         | Redis port                          |         | Redis storage |
 | `REDIS_DB`           | Redis DB number                     | 0       | Redis storage |
