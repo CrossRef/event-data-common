@@ -38,8 +38,6 @@ If the bucket is not empty, tests will still pass, but it may take a long time t
 
  - `aws s3 rm --region «REGION» --recursive s3://«BUCKET»`
 
-
-
 All tests:
 
 These have the same requisites for integration tests.
@@ -61,6 +59,14 @@ The following configuration keys must be set in any code that uses these librari
 | `S3_REGION_NAME`     | AWS S3 bucket region name           |         | S3 storage    |
 | `STATUS_SERVICE`     | Public URL of the Status service    |         | Status Reporting |
 | `JWT_SECRETS`        | Comma-separated list of JTW Secrets |         | JWT Verification |
+
+
+## Distribution
+
+To distribute:
+
+ 1. Tag release
+ 2. `lein release clojars`
 
 ## License
 
