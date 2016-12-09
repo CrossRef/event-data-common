@@ -1,0 +1,1 @@
+docker build -f Dockerfile -t crossref/event-data-common .

@@ -1,0 +1,105 @@
+(ns event-data-common.storage.redis-tests
+  "Component tests for the storage.redis namespace."
+  (:require [clojure.test :refer :all]
+            [config.core :refer [env]]
+            [event-data-common.storage.redis :as redis]
+            [event-data-common.storage.store :as store]))
+
+; Store interface
+
+(def the-prefix "the-prefix")
+(def default-db-str "0")
+
+(defn build
+  "Build Redis storage with config"
+  []
+  (redis/build the-prefix (:redis-host env) (Integer/parseInt (:redis-port env)) (Integer/parseInt (get env :redis-db default-db-str))))
+
+(deftest ^:component set-and-get
+  (testing "Key can be set and retrieved."
+    (let [k "this is my key"
+          v "this is my value"
+          ; build a redis connection with the present configuration.
+          conn (build)]
+      (store/set-string conn k v)
+      (is (= v (store/get-string conn k)) "Correct value returned"))))
+
+(deftest ^:component setex-and-get
+  (testing "Key can be set with expiry and retrieved."
+    (let [ki "this is my immediately expiring key"
+          kl "this is my long expiring key"
+          vi "this is my immediately expiring value"
+          vl "this is my long expiring value"
+
+          ; build a redis connection with the present configuration.
+          conn (build)]
+      ; Set immediately expiring key and one that expires after 100 seconds.
+      (redis/set-string-and-expiry conn ki 1 vi)
+      (redis/set-string-and-expiry conn kl 100000 vl)
+
+      ; A brief nap should be OK.
+      (Thread/sleep 2)
+
+      (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
+      (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
+
+(deftest ^:component keys-matching-prefix
+  (testing "All keys matching prefix should be returned."
+    ; Insert 10,000 keys that we do want to match and 10,000 that we don't.
+    (let [conn (build)
+          num-keys 10000
+          included-keys (map #(str "included-" %) (range num-keys))
+          not-included-keys (map #(str "not-included-" %) (range num-keys))]
+
+      ; Clear all keys first.
+      (doseq [k (store/keys-matching-prefix conn "")]
+        (store/delete conn k))
+
+      (store/set-string conn "single-test-object" "some data")
+
+
+      (doseq [k included-keys]
+        (store/set-string conn k "some data"))
+      
+      (doseq [k not-included-keys]
+        (store/set-string conn k "some data"))
+      
+      (let [keys-matching (store/keys-matching-prefix conn "included-")]
+        (is (= (count keys-matching) num-keys) "The right number of keys should be returned.")
+
+        ; Every key we get should start with the right prefix.
+        (is (every? true? (map #(.startsWith % "included-") keys-matching)))))))
+
+
+; Redis interface
+
+(deftest ^:component expiring-mutex
+  (testing "Expiring mutex can only be set once in expiry time.")
+  (let [conn (build)
+        k "my key"]
+    ; First set should be OK.
+    (is (true? (redis/expiring-mutex!? conn k 2000)) "First set to mutex for key should be true.")
+
+    ; Second should be false. Also reset timing of mutex.
+    (is (false? (redis/expiring-mutex!? conn k 1)) "Second set to mutex for key should be false.")
+
+    ; Let it expire for a couple of milliseconds.
+    (Thread/sleep 2)
+
+    (is (true? (redis/expiring-mutex!? conn k 2000)) "Access to mutex should be true after expiry.")))
+
+
+; Internals
+
+(def the-prefix-length (.length the-prefix))
+
+(deftest ^:unit add-remove-prefix
+  (testing "Prefix can be added and removed"
+    (let [original "one two three"
+          prefixed (redis/add-prefix the-prefix original)
+          unprefixed (redis/remove-prefix the-prefix-length prefixed)]
+      (is (not= original prefixed) "Prefix is added")
+      (is (not= prefixed unprefixed) "Prefix is removed")
+      (is (= original unprefixed) "Correct prefix is removed"))))
+
+
