@@ -15,6 +15,21 @@
   []
   (redis/build the-prefix (:redis-host env) (Integer/parseInt (:redis-port env)) (Integer/parseInt (get env :redis-db default-db-str))))
 
+(deftest ^:component incr-key-by
+  (testing "Key be incremented and retrieved."
+    (let [k "key-to-increment"
+          ; build a redis connection with the present configuration.
+          conn (build)]
+      (is (= nil (store/get-string conn k)) "Nil returned for non-existent key")
+
+      (is (= 7 (redis/incr-key-by!? conn k 7)) "incr-key-by!? from nil returns that number")
+
+      (is (= "7" (store/get-string conn k)) "Number can be retrieved")
+
+      (is (= 18 (redis/incr-key-by!? conn k 11)) "incr-key-by!? adds that number")
+
+      (is (= "18" (store/get-string conn k)) "New number can be retrieved"))))
+
 (deftest ^:component set-and-get
   (testing "Key can be set and retrieved."
     (let [k "this is my key"

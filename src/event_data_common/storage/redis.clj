@@ -44,7 +44,9 @@
   "Redis-specific interface."
   (set-string-and-expiry [this k v milliseconds] "Set string value with expiry in milliseconds.")
 
-  (expiring-mutex!? [this k milliseconds] "Check and set expiring mutex atomically, returning true if didn't exist."))
+  (expiring-mutex!? [this k milliseconds] "Check and set expiring mutex atomically, returning true if didn't exist.")
+
+  (incr-key-by!? [this k value] "Set and return incremented Long value."))
 
 ; An object that implements a Store (see `event-data-common.storage.store` namespace).
 ; Not all methods are recommended for use in production, some are for component tests.
@@ -86,7 +88,12 @@
       ; Set a token value. SETNX returns true if it wasn't set before.
       (let [success (= 1 (.setnx conn (add-prefix prefix k) "."))]
         (.pexpire conn (add-prefix prefix k) milliseconds)
-        success))))
+        success)))
+
+  (incr-key-by!? [this k value]
+    (with-open [conn (get-connection pool db-number)]
+      (let [result (.incrBy conn (add-prefix prefix k) (long value))]
+        result))))
 
 (defn build
   "Build a RedisConnection object."
