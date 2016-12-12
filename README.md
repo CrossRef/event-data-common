@@ -1,4 +1,4 @@
-# Event Data Common
+git# Event Data Common
 
 Common components for various services of Event Data. Tests run in Docker, but this is distributed as a Clojure library.
 
@@ -23,6 +23,10 @@ Implementation of storage for AWS S3.
 ### JWT verification
 
 Verify that a JWT has been passed into a header. More than one secret can be supplied in configuration.
+
+### Date and time
+
+Various date and time functions, mostly connected to archiving.
 
 ## Testing
 
