@@ -4,7 +4,8 @@
    All keys are stored in Redis with the given prefix."
   (:require 
             [event-data-common.storage.store :refer [Store]])
-  (:import [redis.clients.jedis Jedis JedisPool JedisPoolConfig ScanResult ScanParams]))
+  (:import [redis.clients.jedis Jedis JedisPool JedisPoolConfig ScanResult ScanParams JedisPubSub]))
+
 
 (defn remove-prefix
   [prefix-length ^String k]
@@ -46,7 +47,11 @@
 
   (expiring-mutex!? [this k milliseconds] "Check and set expiring mutex atomically, returning true if didn't exist.")
 
-  (incr-key-by!? [this k value] "Set and return incremented Long value."))
+  (incr-key-by!? [this k value] "Set and return incremented Long value.")
+
+  (publish-pubsub [this channel value] "Broadcast over PubSub")
+
+  (subscribe-pubsub [this channel callback] "Register callback for PubSub channel and block thread."))
 
 ; An object that implements a Store (see `event-data-common.storage.store` namespace).
 ; Not all methods are recommended for use in production, some are for component tests.
@@ -93,7 +98,19 @@
   (incr-key-by!? [this k value]
     (with-open [conn (get-connection pool db-number)]
       (let [result (.incrBy conn (add-prefix prefix k) (long value))]
-        result))))
+        result)))
+
+  (publish-pubsub [this channel value]
+    (with-open [conn (get-connection pool db-number)]
+      (.publish conn channel value)))
+
+  (subscribe-pubsub [this channel-name callback]
+    (with-open [conn (get-connection pool db-number)]
+      (.subscribe conn
+        (proxy [JedisPubSub] []
+          (onMessage [^String channel ^String message]
+            (callback message)))
+        (into-array String [channel-name])))))
 
 (defn build
   "Build a RedisConnection object."

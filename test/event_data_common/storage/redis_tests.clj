@@ -1,6 +1,7 @@
 (ns event-data-common.storage.redis-tests
   "Component tests for the storage.redis namespace."
   (:require [clojure.test :refer :all]
+            [clojure.core.async :as async]
             [config.core :refer [env]]
             [event-data-common.storage.redis :as redis]
             [event-data-common.storage.store :as store]))
@@ -89,7 +90,6 @@
 
       (store/set-string conn "single-test-object" "some data")
 
-
       (doseq [k included-keys]
         (store/set-string conn k "some data"))
       
@@ -120,6 +120,53 @@
 
     (is (true? (redis/expiring-mutex!? conn k 2000)) "Access to mutex should be true after expiry.")))
 
+(defn seq!!
+  "Returns a (blocking!) lazy sequence read from a channel."
+  [c]
+  (lazy-seq
+   (when-let [v (async/<!! c)]
+     (cons v (seq!! c)))))
+
+(deftest ^:component pub-sub
+  (testing "Published events are broadcast to all listeners."
+    (let [conn1 (build)
+          conn2 (build)
+          pubsub-channel-1 "Channel One"
+          pubsub-channel-2 "Channel Two"
+
+          message-1 "Hello"
+          message-2 "Goodbye"
+
+          ; three test core.async channels
+          chan-1 (async/chan)
+          chan-2 (async/chan)
+          chan-both (async/chan)]
+
+      ; Subscriptions block the thread.
+
+      ; Subscriptions to put messages from pubsub channel 1 into channel 1.
+      (async/thread (redis/subscribe-pubsub conn1 pubsub-channel-1 #(async/>!! chan-1 %)))
+
+      ; Ditto channel 2
+      (async/thread (redis/subscribe-pubsub conn1 pubsub-channel-2 #(async/>!! chan-2 %)))
+
+      ; And two to put them both into channel 3.
+      ; The client allows only one subscriber per channel, so these must be on a new client. This also demonstrates cross-client pubsub.
+      (async/thread (redis/subscribe-pubsub conn2 pubsub-channel-1 #(async/>!! chan-both %)))
+      (async/thread (redis/subscribe-pubsub conn2 pubsub-channel-2 #(async/>!! chan-both %)))
+
+      ; Sleep for a second to allow the subscribers to register in their threads.
+      ; This is not ideal, but otherwise we have a race condition in the test code where pubsub events are sent before the listeners have registered.
+      (Thread/sleep 1000)
+
+      ; Now send something from each connection.
+      (redis/publish-pubsub conn1 pubsub-channel-1 message-1)
+      (redis/publish-pubsub conn2 pubsub-channel-2 message-2)
+
+      ; We expected to get two messages on channel 1.
+      (is (= message-1 (async/<!! chan-1)) "Channel 1 should have message 1 twice")
+      (is (= message-2 (async/<!! chan-2)) "Channel 1 should have message 2 twice")
+      (is (= #{message-1 message-2} (set (take 2 (seq!! chan-both)))) "Channel 3 should have both messages"))))
 
 ; Internals
 

@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.3"
+(defproject event-data-common "0.1.4"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
@@ -10,7 +10,7 @@
                  [http-kit "2.1.18"]
                  [http-kit.fake "0.2.1"]
                  [liberator "0.14.1"]
-                 [org.clojure/core.async "0.2.385"]
+                 [org.clojure/core.async "0.2.395"]
                  [org.clojure/data.json "0.2.6"]
                  [overtone/at-at "1.2.0"]
                  [redis.clients/jedis "2.8.0"]

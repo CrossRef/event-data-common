@@ -14,7 +14,7 @@ A key-value storage protocol.
 
 ### Redis storage
 
-Implementation of storage for Redis.
+Implementation of storage for Redis plus other features like pub-sub for lightweight notifications.
 
 ### S3 storage
 
