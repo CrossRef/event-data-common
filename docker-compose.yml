@@ -11,6 +11,7 @@ services:
      - REDIS_HOST=redis
      - REDIS_PORT=6379
      - REDIS_DB=0
+     - STATUS_SERVICE=http://localhost:8003
      - JWT_SECRETS=TEST,TEST2
     command: "lein test"
 
