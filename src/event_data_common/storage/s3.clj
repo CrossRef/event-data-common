@@ -1,11 +1,12 @@
 (ns event-data-common.storage.s3
   "Storage interface for AWS S3."
   (:require [event-data-common.storage.store :refer [Store]]
+            [event-data-common.storage.store :as store]
             [clojure.tools.logging :as l]
             [config.core :refer [env]])
   (:import [com.amazonaws.services.s3 AmazonS3 AmazonS3Client]
            [com.amazonaws.auth BasicAWSCredentials]
-           [com.amazonaws.services.s3.model GetObjectRequest PutObjectRequest ObjectMetadata S3Object ObjectListing S3ObjectSummary]
+           [com.amazonaws.services.s3.model GetObjectRequest PutObjectRequest ObjectMetadata S3Object ObjectListing S3ObjectSummary ListObjectsRequest]
            [com.amazonaws AmazonServiceException AmazonClientException]
            [com.amazonaws.regions Regions Region]
            [org.apache.commons.io IOUtils]
@@ -45,29 +46,39 @@
   (map #(.getKey ^S3ObjectSummary %) (.getObjectSummaries listing)))
 
 (defn list-objects
-  "List the next page of objects, or the first page if prev-listing is nil."
-  [client bucket-name prefix prev-listing]
+  "List the next page of objects, or the first page if prev-listing is nil.
+   If delimiter is supplied, list common key strings up to and including delimiter."
+  [client bucket-name prefix delimiter prev-listing]
   (if-not prev-listing
     ; Start at first page.
-    (let [^ObjectListing this-listing (.listObjects client bucket-name prefix)]
+  
+    (let [^ListObjectsRequest request (new ListObjectsRequest bucket-name prefix nil delimiter nil)
+          ^ObjectListing this-listing (.listObjects client request)]
       (if-not (.isTruncated this-listing)
-        ; This is the last page
-        (get-keys this-listing)
+        ; This is the last page return keys, or parts of keys if there was a delimiter.
+        (if delimiter
+          (.getCommonPrefixes this-listing)
+          (get-keys this-listing))
 
         ; This is not the last page.
         ; Recurse with the listing as the next-page token.
-        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix this-listing))))
+        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix this-listing delimiter))))
 
     ; Start at subsequent page.
     (let [^ObjectListing this-listing (.listNextBatchOfObjects client prev-listing)]
       (if-not (.isTruncated this-listing)
-        ; This is the last page
-        (get-keys this-listing)
+        ; This is the last page return keys, or parts of keys if there was a delimiter.
+        (if delimiter
+          (.getCommonPrefixes this-listing)
+          (get-keys this-listing))
 
         ; This is not the last page.
         ; Recurse with the listing as the next-page token.
-        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix this-listing))))))
+        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix this-listing delimiter))))))
 
+(defprotocol S3
+  "AWS S3-specific interface."
+  (list-with-delimiter [this prefix delimiter] "List keys with prefix, up to and including delimiter. See S3 API definition for more info."))
 
 (defrecord S3Connection
   [^AmazonS3Client client s3-bucket-name]
@@ -83,11 +94,15 @@
 
   (keys-matching-prefix [this prefix]
     (l/debug "Store scan prefix" prefix)
-    (list-objects client s3-bucket-name prefix nil))
+    (list-objects client s3-bucket-name prefix nil nil))
 
   (delete [this k]
     (l/debug "Delete key" k)
-    (.deleteObject client s3-bucket-name k)))
+    (.deleteObject client s3-bucket-name k))
+
+  S3
+  (list-with-delimiter [this prefix delimiter]
+    (list-objects client s3-bucket-name prefix delimiter nil)))
 
 (defn build
   "Build a S3Connection object."

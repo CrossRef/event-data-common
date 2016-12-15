@@ -31,12 +31,12 @@
     (doseq [futur futures]
       (deref futur))))
 
+; Test both the storage/keys-matching-prefix and the S3-only s3/list-with-delimiter
 (deftest ^:integration keys-matching-prefix
-  (testing "All keys matching prefix should be returned."
     ; Insert 1,500 keys that we do want to match and 1,500 that we don't.
     (let [conn (build)
           num-keys 1500
-          included-keys (map #(str "included-" %) (range num-keys))
+          included-keys (map #(str "included/item-" %) (range num-keys))
           not-included-keys (map #(str "not-included-" %) (range num-keys))
 
           c (atom 0)]
@@ -46,11 +46,13 @@
       ; Because S3 doesn't have strict deleted-after-delete semantics, this may occasionally fail.
       (parallel-doseq (store/keys-matching-prefix conn "")
                       (fn [k]
-                        (prn (swap! c inc) "/" (count (store/keys-matching-prefix conn "")))
+                        (locking *out*
+                          (prn (swap! c inc) "/" (count (store/keys-matching-prefix conn ""))))
                         (store/delete conn k)))
 
       (store/set-string conn "single-test-object" "some data")
 
+    (testing "All keys matching prefix should be returned."
       (let [keys-matching (store/keys-matching-prefix conn "")]
         (is (= 1 (count keys-matching)) "Bucket should initially be empty, adding a single key should result in a single key."))
 
@@ -60,9 +62,13 @@
       (doseq [k not-included-keys]
         (store/set-string conn k "some data"))
       
-      (let [keys-matching (store/keys-matching-prefix conn "included-")]
+      (let [keys-matching (store/keys-matching-prefix conn "included")]
         (is (= (count keys-matching) num-keys) "The right number of keys should be returned.")
 
         ; Every key we get should start with the right prefix.
-        (is (every? true? (map #(.startsWith % "included-") keys-matching)))))))
+        (is (every? true? (map #(.startsWith % "included") keys-matching)))))
+
+    (testing "Can retrieve directory-like listing with list-with-delimiter"
+      (let [list-with-delimter-result (s3/list-with-delimiter conn "included" "/")]
+        (is (= ["included/"] list-with-delimter-result) "list-with-delimiter should stop at delimiter")))))
 
