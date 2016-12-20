@@ -4,7 +4,7 @@ Common components for various services of Event Data. Tests run in Docker, but t
 
 ## To use
 
-    [event-data-common "0.1.6"]
+    [event-data-common "0.1.8"]
 
 ## Components
 
@@ -31,6 +31,10 @@ Send updates to the Status Service.
 ### Date and time
 
 Various date and time functions, mostly connected to archiving.
+
+### Backoff
+
+Try and re-try functions in a threadpool. For robust connection to external systems.
 
 ## Testing
 
