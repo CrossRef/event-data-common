@@ -4,13 +4,13 @@ Common components for various services of Event Data. Tests run in Docker, but t
 
 ## To use
 
-    [event-data-common "0.1.8"]
+    [event-data-common "0.1.10"]
 
 ## Components
 
 ### Storage
 
-A key-value storage protocol.
+A key-value storage protocol. Includes real storage interface for Redis and S3, and a test-only in-memory storage.
 
 ### Redis storage
 
