@@ -8,15 +8,17 @@
 
 (def jwt-auth (delay (jwt/build (:jwt-secrets env))))
 
-; Create an empty token. Specific claims not required to send to status.
-(def jwt-token (delay (jwt/sign @jwt-auth {})))
+; Get a token. Either accept one from env, or make an empty one using the secret.
+; Specific claims not required to send to status.
+(def jwt-token (delay (or (:jwt-token env)
+                          (jwt/sign @jwt-auth {}))))
 
 (defn send!
   "Send an update for a component/fragment/heartbeat"
   [service component fragment heartbeat-count]
   (let [the-path (str "/status/" service "/" component "/" fragment)]
     (try 
-      (try-try-again {:sleep 10000 :tries 10} ; TODO
+      (try-try-again {:sleep 10000 :tries 10}
          #(let [result @(client/post (str (:status-service env) the-path)
                          {:headers {"Content-type" "text/plain" "Authorization" (str "Bearer " @jwt-token)}
                           :body (str heartbeat-count)})]

@@ -3,8 +3,8 @@ services:
   test:
     build: .
     volumes:
-     - .:/code
-     - ./.m2-cache:/home/deploy/.m2
+     - .:/usr/src/app
+     - ./.m2-cache:/root/.m2
     depends_on:
      - redis
     environment:
