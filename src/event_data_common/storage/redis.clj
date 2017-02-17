@@ -32,6 +32,8 @@
   [host port]
   (let [pool-config (new org.apache.commons.pool2.impl.GenericObjectPoolConfig)]
     (.setMaxTotal pool-config 100)
+    (.setTestOnBorrow pool-config true)
+
   (new JedisPool pool-config host port)))
 
 (defn ^Jedis get-connection

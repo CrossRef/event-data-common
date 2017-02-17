@@ -13,7 +13,7 @@ services:
      - REDIS_DB=0
      - STATUS_SERVICE=http://localhost:8003
      - JWT_SECRETS=TEST,TEST2
-     - ARTIFACT_BASE=http://artifact-test/
+     - ARTIFACT_BASE=http://artifact-test
     command: "lein test"
 
   redis:

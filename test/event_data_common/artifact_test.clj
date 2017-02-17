@@ -70,7 +70,4 @@
 
           (is (= (artifact/fetch-latest-artifact-string "crossref-sourcelist")  "version 1481825550368 of artifact crossref-sourcelist") "fetch-latest-artifact-string should follow link to latest and download it.")
           (is (= (artifact/fetch-latest-artifact-string "newsfeed-list")  "version 1481821264217 of artifact newsfeed-list") "fetch-latest-artifact-string should follow link to latest and download it.")
-          (is (= (artifact/fetch-latest-artifact-string "elephant-list")  nil) "fetch-latest-artifact-string should return nil if non-existent artifact requested")
-
-
-          )))
+          (is (= (artifact/fetch-latest-artifact-string "elephant-list")  nil) "fetch-latest-artifact-string should return nil if non-existent artifact requested"))))

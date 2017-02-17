@@ -7,7 +7,6 @@
             [clojure.data.json :as json]
             [config.core :refer [env]]))
 
-
 (defn fetch-index
   "Retrieve the Artifact index."
   []
