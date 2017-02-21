@@ -57,7 +57,7 @@
 (deftest ^:unit can-retrieve-artifacts
   (testing "Can succesfully retrieve the list of artifacts."
       (fake/with-fake-http
-        ["http://artifact-test/a/artifacts.json"
+        ["http://d1v52iseus4yyg.cloudfront.net/a/artifacts.json"
          artifact-index-json
          
          "http://d1v52iseus4yyg.cloudfront.net/a/crossref-sourcelist/versions/1481825550368"

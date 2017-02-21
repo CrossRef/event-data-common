@@ -42,15 +42,15 @@ Try and re-try functions in a threadpool. For robust connection to external syst
 
 Unit tests:
 
-  - `time docker-compose run -w /usr/src/app test lein test :unit`
+  - `time docker-compose -f docker-compose-tests.yml run test lein test :unit`
 
 Component tests:
 
-  - `time docker-compose run -w /usr/src/app test lein test :component`
+  - `time docker-compose -f docker-compose-tests.yml run test lein test :component`
 
 Integration tests require you to set environment variables `S3_KEY`, `S3_SECRET`, `S3_BUCKET_NAME`, `S3_REGION_NAME` in a `.env` file. NB this performs quite a lot of activity talking to AWS S3. An *empty* bucket should be provided.
 
- - `time docker-compose -f docker-compose-integration-tests.yml run -w /usr/src/app test lein test :integration`
+ - `time docker-compose -f docker-compose-tests.yml run -w /usr/src/app test lein test :integration`
 
 If the bucket is not empty, tests will still pass, but it may take a long time to clear the bucket. The AWS command-line tools provide a quick parallel way to empty a bucket:
 
@@ -60,7 +60,7 @@ All tests:
 
 These have the same requisites for integration tests.
 
-- `time docker-compose run -f docker-compose-integration-tests.yml -w /code test lein test :all`
+- `time docker-compose run -f docker-compose-tests.yml -w /code test lein test :all`
 
 ## Configuration
 

@@ -12,7 +12,7 @@
   []
   ; TODO: Java 8 has some problem with CloudFront certificates.
   ; https://forums.aws.amazon.com/message.jspa?messageID=669911
-  (let [the-path (str (:artifact-base env) "a/artifacts.json")]
+  (let [the-path (str (:artifact-base env) "/a/artifacts.json")]
     (try 
       (try-try-again {:sleep 10000 :tries 10}
          #(let [result @(client/get
