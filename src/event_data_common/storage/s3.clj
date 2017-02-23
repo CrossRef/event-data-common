@@ -51,7 +51,6 @@
   [client bucket-name prefix delimiter prev-listing]
   (if-not prev-listing
     ; Start at first page.
-  
     (let [^ListObjectsRequest request (new ListObjectsRequest bucket-name prefix nil delimiter nil)
           ^ObjectListing this-listing (.listObjects client request)]
       (if-not (.isTruncated this-listing)
@@ -62,7 +61,7 @@
 
         ; This is not the last page.
         ; Recurse with the listing as the next-page token.
-        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix this-listing delimiter))))
+        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix delimiter this-listing))))
 
     ; Start at subsequent page.
     (let [^ObjectListing this-listing (.listNextBatchOfObjects client prev-listing)]
@@ -74,7 +73,7 @@
 
         ; This is not the last page.
         ; Recurse with the listing as the next-page token.
-        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix this-listing delimiter))))))
+        (lazy-cat (get-keys this-listing) (list-objects client bucket-name prefix delimiter this-listing))))))
 
 (defprotocol S3
   "AWS S3-specific interface."

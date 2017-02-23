@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.14"
+(defproject event-data-common "0.1.15"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
@@ -26,7 +26,6 @@
                  [com.amazonaws/aws-java-sdk "1.11.61"]
                  ; Required for AWS, but not fetched.
                  [org.apache.httpcomponents/httpclient "4.5.2"]]
-  :java-source-paths ["src-java"]
   :target-path "target/%s"
   :test-selectors {:default (constantly true)
                    :unit :unit
