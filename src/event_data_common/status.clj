@@ -4,7 +4,7 @@
             [event-data-common.backoff :as backoff]
             [robert.bruce :refer [try-try-again]]
             [clojure.tools.logging :as log]
-            [org.httpkit.client :as client]
+            [clj-http.client :as client]
             [config.core :refer [env]]))
 
 (def jwt-auth (delay (jwt/build (:jwt-secrets env))))
@@ -23,7 +23,7 @@
   
   (let [the-path (str "/status/" service "/" component "/" fragment)]
     (backoff/try-backoff
-      #(let [result @(client/post (str (:status-service env) the-path)
+      #(let [result (client/post (str (:status-service env) the-path)
                          {:headers {"Content-type" "text/plain" "Authorization" (str "Bearer " @jwt-token)}
                           :body (str heartbeat-count)})]
            (when-not (= (:status result) 201)

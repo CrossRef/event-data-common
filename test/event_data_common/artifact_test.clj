@@ -1,7 +1,7 @@
 (ns event-data-common.artifact-test
   (:require [clojure.test :refer :all]
             [event-data-common.artifact :as artifact]
-            [org.httpkit.fake :as fake]
+            [clj-http.fake :as fake]
             [clojure.data.json :as json]))
 
 (def artifact-index-structure
@@ -56,15 +56,15 @@
 
 (deftest ^:unit can-retrieve-artifacts
   (testing "Can succesfully retrieve the list of artifacts."
-      (fake/with-fake-http
-        ["http://d1v52iseus4yyg.cloudfront.net/a/artifacts.json"
-         artifact-index-json
+      (fake/with-global-fake-routes-in-isolation
+        {"http://d1v52iseus4yyg.cloudfront.net/a/artifacts.json"
+         (fn [req]  {:status 200 :headers {} :body artifact-index-json})
          
          "http://d1v52iseus4yyg.cloudfront.net/a/crossref-sourcelist/versions/1481825550368"
-         "version 1481825550368 of artifact crossref-sourcelist"
+         (fn [req]  {:status 200 :headers {} :body "version 1481825550368 of artifact crossref-sourcelist"})
 
          "http://d1v52iseus4yyg.cloudfront.net/a/newsfeed-list/versions/1481821264217"
-         "version 1481821264217 of artifact newsfeed-list"]
+         (fn [req]  {:status 200 :headers {} :body "version 1481821264217 of artifact newsfeed-list"})}
         
           (is (= (set (artifact/fetch-artifact-names)) #{"crossref-sourcelist" "doi-prefix-list" "domain-list" "newsfeed-list" "other"} ) "List of all artifacts should be retrieved.")
 
