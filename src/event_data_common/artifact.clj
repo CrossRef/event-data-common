@@ -3,7 +3,7 @@
   (:require [event-data-common.jwt :as jwt]
             [robert.bruce :refer [try-try-again]]
             [clojure.tools.logging :as log]
-            [org.httpkit.client :as client]
+            [clj-http.client :as client]
             [clojure.data.json :as json]
             [config.core :refer [env]]))
 
@@ -15,8 +15,7 @@
   (let [the-path (str (:artifact-base env) "/a/artifacts.json")]
     (try 
       (try-try-again {:sleep 10000 :tries 10}
-         #(let [result @(client/get
-                          the-path)
+         #(let [result (client/get the-path)
                 parsed (when-let [body (:body result)] (json/read-str body))]
            (when-not (= (:status result) 200)
              (log/error "Can't get Artifact list from" the-path "response status:" (:status result))
@@ -27,6 +26,7 @@
       (do
         (log/error "Gave up getting Artifact List" the-path "response" e)
         (throw e))))))
+
 
 (defn fetch-artifact-names
   []
@@ -45,9 +45,7 @@
    (when-let [the-path (fetch-latest-version-link artifact-name)]
     (try 
       (try-try-again {:sleep 10000 :tries 10}
-         #(let [result @(client/get
-                          the-path
-                          {:as typ})]
+         #(let [result (client/get the-path {:as typ})]
            (when-not (= (:status result) 200)
             
              (log/error "Can't get Artifact list from" the-path "response status:" (:status result))
