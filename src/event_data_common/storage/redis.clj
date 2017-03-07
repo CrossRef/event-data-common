@@ -47,6 +47,8 @@
   "Redis-specific interface."
   (set-string-and-expiry [this k v milliseconds] "Set string value with expiry in milliseconds.")
 
+  (set-string-and-expiry-seconds [this k v seconds] "Set string value with expiry in seconds.")
+
   (expiring-mutex!? [this k milliseconds] "Check and set expiring mutex atomically, returning true if didn't exist.")
 
   (incr-key-by!? [this k value] "Set and return incremented Long value.")
@@ -89,6 +91,10 @@
   (set-string-and-expiry [this k milliseconds v]
     (with-open [conn (get-connection pool db-number)]
       (.psetex conn (add-prefix prefix k) milliseconds v)))
+
+  (set-string-and-expiry-seconds [this k seconds v]
+    (with-open [conn (get-connection pool db-number)]
+      (.setex conn (add-prefix prefix k) seconds v)))
 
   (expiring-mutex!? [this k milliseconds]
     (with-open [conn (get-connection pool db-number)]

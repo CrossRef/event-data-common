@@ -57,8 +57,8 @@
 
       (is (nil? (store/get-string conn k)) "Key should not exist after deletion."))))
 
-(deftest ^:component setex-and-get
-  (testing "Key can be set with expiry and retrieved."
+(deftest ^:component setex-and-get-ms
+  (testing "Key can be set with expiry millseconds and retrieved."
     (let [ki "this is my immediately expiring key"
           kl "this is my long expiring key"
           vi "this is my immediately expiring value"
@@ -72,6 +72,25 @@
 
       ; A brief nap should be OK.
       (Thread/sleep 2)
+
+      (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
+      (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
+
+(deftest ^:component setex-and-get-seconds
+  (testing "Key can be set with expiry seconds and retrieved."
+    (let [ki "this is my immediately expiring key"
+          kl "this is my long expiring key"
+          vi "this is my immediately expiring value"
+          vl "this is my long expiring value"
+
+          ; build a redis connection with the present configuration.
+          conn (build)]
+      ; Set immediately expiring key and one that expires after 100 seconds.
+      (redis/set-string-and-expiry-seconds conn ki 1 vi)
+      (redis/set-string-and-expiry-seconds conn kl 10 vl)
+
+      ; A couple of seconds.
+      (Thread/sleep 2000)
 
       (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
       (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
