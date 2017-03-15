@@ -49,6 +49,8 @@
 
   (set-string-and-expiry-seconds [this k v seconds] "Set string value with expiry in seconds.")
 
+  (expire-seconds! [this k seconds] "Set expiry in seconds.")
+
   (expiring-mutex!? [this k milliseconds] "Check and set expiring mutex atomically, returning true if didn't exist.")
 
   (incr-key-by!? [this k value] "Set and return incremented Long value.")
@@ -95,6 +97,10 @@
   (set-string-and-expiry-seconds [this k seconds v]
     (with-open [conn (get-connection pool db-number)]
       (.setex conn (add-prefix prefix k) seconds v)))
+
+  (expire-seconds! [this k seconds]
+    (with-open [conn (get-connection pool db-number)]
+      (.expire conn (add-prefix prefix k) seconds)))
 
   (expiring-mutex!? [this k milliseconds]
     (with-open [conn (get-connection pool db-number)]

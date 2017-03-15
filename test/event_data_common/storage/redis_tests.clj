@@ -95,6 +95,28 @@
       (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
       (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
 
+(deftest ^:component expire-seconds!
+  (testing "Key expires after given number of seconds"
+    (let [ki "this is my immediately expiring key"
+          kl "this is my long expiring key"
+          vi "this is my immediately expiring value"
+          vl "this is my long expiring value"
+
+          ; build a redis connection with the present configuration.
+          conn (build)]
+      ; Set immediately expiring key and one that expires after 100 seconds.
+      (store/set-string conn ki vi)
+      (store/set-string conn kl vl)
+
+      (redis/expire-seconds! conn ki 1)
+      (redis/expire-seconds! conn kl 10)
+
+      ; A couple of seconds.
+      (Thread/sleep 2000)
+
+      (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
+      (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
+
 (deftest ^:component keys-matching-prefix
   (testing "All keys matching prefix should be returned."
     ; Insert 10,000 keys that we do want to match and 10,000 that we don't.
