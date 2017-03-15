@@ -3,7 +3,8 @@
   (:require [event-data-common.storage.store :refer [Store]]
             [event-data-common.storage.store :as store]
             [clojure.tools.logging :as l]
-            [config.core :refer [env]])
+            [config.core :refer [env]]
+            [robert.bruce :refer [try-try-again]])
   (:import [com.amazonaws.services.s3 AmazonS3 AmazonS3Client]
            [com.amazonaws.auth BasicAWSCredentials]
            [com.amazonaws.services.s3.model GetObjectRequest PutObjectRequest ObjectMetadata S3Object ObjectListing S3ObjectSummary ListObjectsRequest]
@@ -11,6 +12,9 @@
            [com.amazonaws.regions Regions Region]
            [org.apache.commons.io IOUtils]
            [java.io InputStream]))
+
+; S3 has its own retry but it can still be unreliable sometimes.
+(def try-again-config {:sleep 10000 :tries 10})
 
 ; Default retry policy of 3 to cope with failure.
 ; http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/ClientConfiguration.html#DEFAULT_RETRY_POLICY
@@ -85,23 +89,23 @@
   Store
   (get-string [this k]
     (l/debug "Store get" k)
-    (download-string client s3-bucket-name k))
+    (try-try-again try-again-config #(download-string client s3-bucket-name k)))
 
   (set-string [this k v]
     (l/debug "Store set" k)
-    (upload-string client s3-bucket-name k v "application/json"))
+    (try-try-again try-again-config #(upload-string client s3-bucket-name k v "application/json")))
 
   (keys-matching-prefix [this prefix]
     (l/debug "Store scan prefix" prefix)
-    (list-objects client s3-bucket-name prefix nil nil))
+    (try-try-again try-again-config #(list-objects client s3-bucket-name prefix nil nil)))
 
   (delete [this k]
     (l/debug "Delete key" k)
-    (.deleteObject client s3-bucket-name k))
+    (try-try-again try-again-config #(.deleteObject client s3-bucket-name k)))
 
   S3
   (list-with-delimiter [this prefix delimiter]
-    (list-objects client s3-bucket-name prefix delimiter nil)))
+    (try-try-again try-again-config #(list-objects client s3-bucket-name prefix delimiter nil))))
 
 (defn build
   "Build a S3Connection object."
