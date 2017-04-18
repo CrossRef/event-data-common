@@ -16,8 +16,7 @@
   (str prefix k))
 
 (defn scan-match-cursor
-  "Lazy sequence of scan results matching pattern.
-   Return [result-set, cursor]"
+  "Lazy sequence of scan results matching pattern."
   [connection pattern cursor]
   (let [scan-params (.match (new ScanParams) pattern)
         result (.scan connection cursor scan-params)
@@ -27,6 +26,18 @@
     (if (zero? next-cursor)
       items
       (lazy-cat items (scan-match-cursor connection pattern next-cursor)))))
+
+(defn sscan-cursor
+  "Lazy sequence of sscan (set scan) results."
+  [connection k cursor]
+  (let [;scan-params (.match (new ScanParams) pattern)
+        result (.sscan connection k (str cursor))
+        items (.getResult result)
+        next-cursor (.getCursor result)]
+    ; Zero signals end of iteration.
+    (if (zero? next-cursor)
+      items
+      (lazy-cat items (sscan-cursor connection k next-cursor)))))
 
 (defn make-jedis-pool
   [host port]
@@ -57,7 +68,11 @@
 
   (publish-pubsub [this channel value] "Broadcast over PubSub")
 
-  (subscribe-pubsub [this channel callback] "Register callback for PubSub channel and block thread."))
+  (subscribe-pubsub [this channel callback] "Register callback for PubSub channel and block thread.")
+
+  (set-add [this k value] "Add a value to a set.")
+
+  (set-members [this k] "Return all members from a set."))
 
 ; An object that implements a Store (see `event-data-common.storage.store` namespace).
 ; Not all methods are recommended for use in production, some are for component tests.
@@ -75,7 +90,7 @@
 
   (keys-matching-prefix [this the-prefix]
     ; Because we add a prefix to everything in Redis, we need to add that first.
-    (with-open [ conn (get-connection pool db-number)]
+    (with-open [conn (get-connection pool db-number)]
       (let [match (str (add-prefix prefix the-prefix) "*")
             found-keys (scan-match-cursor conn match 0)
             ; remove prefix added here, not the one being searched for.
@@ -124,7 +139,17 @@
         (proxy [JedisPubSub] []
           (onMessage [^String channel ^String message]
             (callback message)))
-        (into-array String [channel-name])))))
+        (into-array String [channel-name]))))
+
+  (set-add [this k value]
+    (with-open [conn (get-connection pool db-number)]
+      (.sadd conn (add-prefix prefix k) (into-array String [value]))))
+
+  (set-members [this k]
+    (with-open [conn (get-connection pool db-number)]
+      ; Not guaranteed to get no duplicates, so put into a set. 
+      ; This also forces evaluation of lazy sequence before the connection is closed.
+      (set (sscan-cursor conn (add-prefix prefix k) 0)))))
 
 (defn build
   "Build a RedisConnection object."

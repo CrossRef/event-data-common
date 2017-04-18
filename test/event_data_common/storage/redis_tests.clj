@@ -209,6 +209,27 @@
       (is (= message-2 (async/<!! chan-2)) "Channel 1 should have message 2 twice")
       (is (= #{message-1 message-2} (set (take 2 (seq!! chan-both)))) "Channel 3 should have both messages"))))
 
+(deftest ^:component sets
+  (testing "Can add to sets and iterate over them."
+    (let [set-name "MY_SET"
+          conn (build)
+          
+          ; Two lots of keys that overlap.
+          first-keys (set (map str (range 0 100000)))
+          second-keys (set (map str (range 50000 150000)))]
+
+      (is (empty? (redis/set-members conn set-name)) "Set should be empty to begin with.")
+
+      (doseq [v first-keys]
+        (redis/set-add conn set-name v))
+
+      (is (= (redis/set-members conn set-name) first-keys) "All keys should have been added.")
+
+      (doseq [v second-keys]
+        (redis/set-add conn set-name v))
+
+      (is (= (redis/set-members conn set-name) (clojure.set/union first-keys second-keys)) "All keys should have been added from second set, keeping unique members."))))
+
 ; Internals
 
 (def the-prefix-length (.length the-prefix))
