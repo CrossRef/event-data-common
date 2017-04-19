@@ -39,6 +39,22 @@
       items
       (lazy-cat items (sscan-cursor connection k next-cursor)))))
 
+(defn zscan-cursor
+  "Return a realized map of {set-member score}"
+  ([connection k] (zscan-cursor connection k 0 {}))
+  ([connection k cursor prev-items]
+    (let [;scan-params (.match (new ScanParams) pattern)
+          result (.zscan connection k (str cursor))
+          ; items is a seq of Tuple 
+          items (into {} (map #(vector (.getElement %) (.getScore %)) (.getResult result)))
+
+          new-items (conj prev-items items)
+          next-cursor (.getCursor result)]
+      ; Zero signals end of iteration.
+      (if (zero? next-cursor)
+        new-items
+        (zscan-cursor connection k next-cursor new-items)))))
+
 (defn make-jedis-pool
   [host port]
   (let [pool-config (new org.apache.commons.pool2.impl.GenericObjectPoolConfig)]
@@ -72,7 +88,13 @@
 
   (set-add [this k value] "Add a value to a set.")
 
-  (set-members [this k] "Return all members from a set."))
+  (set-members [this k] "Return all members from a set.")
+
+  (sorted-set-increment [this k kk value] "Increment the field of a sorted set by the value.")
+
+  (sorted-set-put [this k member value] "Set the field of the sorted set to have the value.")
+
+  (sorted-set-members [this k] "Return all members of the sorted set with their values."))
 
 ; An object that implements a Store (see `event-data-common.storage.store` namespace).
 ; Not all methods are recommended for use in production, some are for component tests.
@@ -149,7 +171,19 @@
     (with-open [conn (get-connection pool db-number)]
       ; Not guaranteed to get no duplicates, so put into a set. 
       ; This also forces evaluation of lazy sequence before the connection is closed.
-      (set (sscan-cursor conn (add-prefix prefix k) 0)))))
+      (set (sscan-cursor conn (add-prefix prefix k) 0))))
+
+  (sorted-set-increment [this k member value]
+    (with-open [conn (get-connection pool db-number)]
+      (.zincrby conn (add-prefix prefix k) (double value) member)))
+    
+  (sorted-set-put [this k member value] "Set the member of the sorted set to have the value."
+    (with-open [conn (get-connection pool db-number)]
+      (.zadd conn (add-prefix prefix k) (double value) (str member))))
+
+  (sorted-set-members [this k] "Return all members of the sorted set with their values."
+    (with-open [conn (get-connection pool db-number)]
+      (zscan-cursor conn (add-prefix prefix k))))) 
 
 (defn build
   "Build a RedisConnection object."

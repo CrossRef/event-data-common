@@ -230,6 +230,39 @@
 
       (is (= (redis/set-members conn set-name) (clojure.set/union first-keys second-keys)) "All keys should have been added from second set, keeping unique members."))))
 
+(deftest ^:component sorted-sets
+  (testing "Can put and increment to sorted sets and iterate over them."
+    (let [set-name "MY_SORTED_SET"
+          conn (build)
+          
+          ; Two lots of keys that overlap. Set a range of values, then increment half of them.
+          ; Biggish numbers so we force multi-result iteration.
+          put-keys (map str (range 0 10000))
+          inc-keys (map str (range 5000 15000))
+
+          expected-set (into {} (concat
+                                  ; First lot should have been putted to 10
+                                  (map #(vector (str %) (double 10)) (range 0 5000))
+                                  ; Intersecting shoudl have been putted to 10 then incremented buy 100
+                                  (map #(vector (str %) (double 110)) (range 5000 10000))
+                                  ; Top non-intersecting should have been inced from null to 100.
+                                  (map #(vector (str %) (double 100)) (range 10000 15000))))]
+
+      (store/delete conn set-name)
+
+      (is (empty? (redis/sorted-set-members conn set-name)) "Sorted set should be empty to begin with.")
+
+      (doseq [v put-keys]
+        (redis/sorted-set-put conn set-name v 10))
+
+      (doseq [v inc-keys]
+        (redis/sorted-set-increment conn set-name v 100))
+
+      (is (= (set (keys (redis/sorted-set-members conn set-name))) (set (map str (range 0 15000)))) "All keys should be present.")
+
+      (is (= (redis/sorted-set-members conn set-name) expected-set) "Expected results of putting and incrementing should be in evidence"))))
+
+
 ; Internals
 
 (def the-prefix-length (.length the-prefix))
