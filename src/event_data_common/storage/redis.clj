@@ -41,19 +41,18 @@
 
 (defn zscan-cursor
   "Return a realized map of {set-member score}"
-  ([connection k] (zscan-cursor connection k 0 {}))
-  ([connection k cursor prev-items]
-    (let [;scan-params (.match (new ScanParams) pattern)
-          result (.zscan connection k (str cursor))
+  [connection k]
+  (loop [cursor 0
+         prev-items {}]
+    (let [result (.zscan connection k (str cursor))
           ; items is a seq of Tuple 
           items (into {} (map #(vector (.getElement %) (.getScore %)) (.getResult result)))
-
           new-items (conj prev-items items)
           next-cursor (.getCursor result)]
       ; Zero signals end of iteration.
       (if (zero? next-cursor)
         new-items
-        (zscan-cursor connection k next-cursor new-items)))))
+        (recur next-cursor new-items)))))
 
 (defn make-jedis-pool
   [host port]
