@@ -5,9 +5,7 @@
             [clojure.tools.logging :as log])
   (:import [org.apache.activemq.broker BrokerService]))
 
-; thread local
-
-; username and password and uri from config
+(def queue-config {:username "my-username" :password "my-password" :queue-name "my-queue" :url "vm://my-broker"})
 
 (deftest ^:component roundtrip
   (testing "Messages can make roundtrip"
@@ -18,14 +16,14 @@
           ; Collect data out the other end here.
           consumed (atom [])]
 
-      (.addConnector broker (:activemq-url env))
+      (.addConnector broker (:url queue-config))
       (.start broker)
 
       (doseq [x to-send]
-        (queue/enqueue x "my-queue"))
+        (queue/enqueue x queue-config))
 
      (try 
-       (queue/process-queue "my-queue"
+       (queue/process-queue queue-config
          (fn [item]
            (swap! consumed conj item)
            ; When we've consumed all we want, throw a harmless exception to kill the thread.
@@ -48,17 +46,17 @@
           ; Broker service must be running in order to construct connection objects.
           ^BrokerService broker (BrokerService.)]
 
-      (.addConnector broker (:activemq-url env))
+      (.addConnector broker (:url queue-config))
       (.start broker)
 
       ; Spin up a few threads, let each one get connection objects and save in objects and objects-again
       (let [threads (doall (map (fn [thread-number]
                                   (Thread. (fn []
-                                    (log/info "Enqueue from " thread-number)
+                                    (log/info "Enqueue from " thread-number "with" queue-config)
                                     (swap! objects assoc (.getId (Thread/currentThread))
-                                                         (queue/get-queue-producer-connection "a-test-queue"))
+                                                         (queue/get-queue-producer-connection queue-config))
                                     (swap! objects-again assoc (.getId (Thread/currentThread))
-                                                               (queue/get-queue-producer-connection "a-test-queue")))))
+                                                               (queue/get-queue-producer-connection queue-config)))))
                          (range num-threads)))]
 
         (doseq [thread threads] (.start thread))
