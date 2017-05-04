@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.23"
+(defproject event-data-common "0.1.24"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
@@ -25,7 +25,13 @@
                  [com.auth0/java-jwt "2.2.1"]
                  [com.amazonaws/aws-java-sdk "1.11.61"]
                  ; Required for AWS, but not fetched.
-                 [org.apache.httpcomponents/httpclient "4.5.2"]]
+                 [org.apache.httpcomponents/httpclient "4.5.2"]
+                 ; https://mvnrepository.com/artifact/org.apache.activemq/activemq-client
+                 [org.apache.activemq/activemq-client "5.14.5"]
+                 ; https://mvnrepository.com/artifact/org.apache.activemq/activemq-broker
+                 [org.apache.activemq/activemq-broker "5.14.5"]
+                 ;; https://mvnrepository.com/artifact/org.apache.activemq/activemq-core
+                 [org.apache.activemq/activemq-core "5.7.0"]]
   :target-path "target/%s"
   :test-selectors {:default (constantly true)
                    :unit :unit

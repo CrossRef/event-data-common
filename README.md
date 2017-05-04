@@ -38,6 +38,10 @@ Various date and time functions, mostly connected to archiving.
 
 Try and re-try functions in a threadpool. For robust connection to external systems.
 
+### Queue
+
+Broadcast and recieve from ActiveMQ queues. Contains sender and listener with thread-local cached connection objects.
+
 ## Testing
 
 Unit tests:
@@ -60,7 +64,7 @@ All tests:
 
 These have the same requisites for integration tests.
 
-- `time docker-compose run -f docker-compose-tests.yml -w /code test lein test :all`
+  - `time docker-compose -f docker-compose-tests.yml run -w /usr/src/app test lein test :all`
 
 ## Configuration
 
@@ -78,6 +82,9 @@ The following configuration keys must be set in any code that uses these librari
 | `STATUS_SERVICE`     | Public URL of the Status service    |         | Status Reporting |
 | `JWT_SECRETS`        | Comma-separated list of JTW Secrets |         | JWT Verification |
 | `ARTIFACT_BASE`      | URL base of Artifact Repository     |         | Artifact         |
+| `ACTIVEMQ_USERNAME`  | Username for ActiveMQ               |         | Queue            |
+| `ACTIVEMQ_PASSWORD`  | Password for ActiveMQ               |         | Queue            |
+| `ACTIVEMQ_URL`       | Connection URL / URI for ActiveMQ   |         | Queue            |
 
 ## Distribution
 
