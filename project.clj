@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.24"
+(defproject event-data-common "0.1.25"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
@@ -31,7 +31,9 @@
                  ; https://mvnrepository.com/artifact/org.apache.activemq/activemq-broker
                  [org.apache.activemq/activemq-broker "5.14.5"]
                  ;; https://mvnrepository.com/artifact/org.apache.activemq/activemq-core
-                 [org.apache.activemq/activemq-core "5.7.0"]]
+                 [org.apache.activemq/activemq-core "5.7.0"]
+                 ;; https://mvnrepository.com/artifact/org.apache.activemq/activemq-pool
+                 [org.apache.activemq/activemq-pool "5.14.5"]]
   :target-path "target/%s"
   :test-selectors {:default (constantly true)
                    :unit :unit
