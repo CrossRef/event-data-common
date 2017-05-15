@@ -1,5 +1,6 @@
 (ns event-data-common.queue
   "ActiveMQ functions. An ActiveMQ queue is specified as a config hash-map of {:username :password :queue-name :url}.
+   Separate pools and connection functions for 'queues' and 'topics'
    This is used to construct the connection, and later to refer to it when sending messages.
    This structure is useful in the places this library is used. No configuration is taken directly from the environment."
   (:require [clojure.data.json :as json]
@@ -33,14 +34,26 @@
 
 (def queue-connections (atom {}))
 
+(def topic-connections (atom {}))
+
 (defn get-queue-producer-connection
-  "Get a PooledConnectionFactory by queue config object. Cache by Thread."
+  "Get a PooledConnectionFactory by config object. Cache by Thread."
   [config]
   (if-let [connection (get @queue-connections config)]
     connection
     (let [new-connection (build-factory config)]
       (log/info "Created new queue connection for config" config)
       (swap! queue-connections assoc config new-connection)
+      new-connection)))
+
+(defn get-topic-producer-connection
+  "Get a PooledConnectionFactory by config object. Cache by Thread."
+  [config]
+  (if-let [connection (get @topic-connections config)]
+    connection
+    (let [new-connection (build-factory config)]
+      (log/info "Created new topic connection for config" config)
+      (swap! topic-connections assoc config new-connection)
       new-connection)))
 
 (defn process-queue
@@ -58,6 +71,21 @@
           (process-f (json/read-str (.getText ^org.apache.activemq.command.ActiveMQTextMessage message) :key-fn keyword))
           (recur (.receive consumer)))))))
 
+(defn process-topic
+  "Process a topic, a callback is called for every item with structure deserialized from data, assumed to be JSON."
+  [config process-f]
+  (log/info "Starting to process topic" config)
+  ; This runs and blocks in a single thread, so no cache needed.
+  (let [factory (get-topic-producer-connection config)]
+    (with-open [connection (.createConnection factory)]
+      (let [session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)
+            destination (.createTopic session (:topic-name config))
+            consumer (.createConsumer session destination)]
+        (.start connection)
+        (loop [message (.receive consumer)]
+          (process-f (json/read-str (.getText ^org.apache.activemq.command.ActiveMQTextMessage message) :key-fn keyword))
+          (recur (.receive consumer)))))))
+
 (defn enqueue
   "Send data to a queue. Data serialized to JSON."
   [data config]
@@ -69,3 +97,17 @@
               destination (.createQueue session (:queue-name config))
               producer (.createProducer session destination)]
     (.send producer message)))))
+
+
+(defn entopic
+  "Send data to a topic. Data serialized to JSON."
+  [data config]
+  ; This is called repeatedly from any context, so we use the cached objects.
+  (let [factory (get-topic-producer-connection config)]
+    (with-open [connection (.createConnection factory)
+                session (.createSession connection false, Session/AUTO_ACKNOWLEDGE)]
+        (let [message (.createTextMessage session (json/write-str data))
+              destination (.createTopic session (:topic-name config))
+              producer (.createProducer session destination)]
+    (.send producer message)))))
+
