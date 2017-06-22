@@ -8,19 +8,15 @@ services:
     depends_on:
      - redis
     environment:
-     - REDIS_HOST=redis
-     - REDIS_PORT=6379
-     - REDIS_DB=0
-     - JWT_SECRETS=TEST,TEST2
-     - S3_KEY=${S3_KEY}
-     - S3_SECRET=${S3_SECRET}
-     - S3_BUCKET_NAME=${S3_BUCKET_NAME}
-     - S3_REGION_NAME=${S3_REGION_NAME}
-     - STATUS_SERVICE=http://localhost:8003
-     - ARTIFACT_BASE=http://d1v52iseus4yyg.cloudfront.net
-     - ACTIVEMQ_USERNAME=activemq-username
-     - ACTIVEMQ_PASSWORD=activemq-password
-     - ACTIVEMQ_URL=vm://localhost
+     - TEST_REDIS_HOST=redis
+     - TEST_REDIS_PORT=6379
+     - TEST_REDIS_DB=0
+     - GLOBAL_JWT_SECRETS=TEST,TEST2
+     - TEST_S3_KEY=${S3_KEY}
+     - TEST_S3_SECRET=${S3_SECRET}
+     - TEST_S3_BUCKET_NAME=${S3_BUCKET_NAME}
+     - TEST_S3_REGION_NAME=${S3_REGION_NAME}
+     - GLOBAL_ARTIFACT_URL_BASE=http://d1v52iseus4yyg.cloudfront.net
     command: "lein test"
 
   redis:

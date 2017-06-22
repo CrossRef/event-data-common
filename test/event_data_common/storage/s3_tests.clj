@@ -8,7 +8,10 @@
 (defn build
   "Build S3 storage with config"
   []
-  (s3/build (:s3-key env) (:s3-secret env) (:s3-region-name env) (:s3-bucket-name env)))
+  (s3/build (:test-s3-key env)
+            (:test-s3-secret env)
+            (:test-s3-region-name env)
+            (:test-s3-bucket-name env)))
 
 (deftest ^:integration set-and-get
   (testing "Key can be set and retrieved."

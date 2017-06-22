@@ -70,18 +70,10 @@ These have the same requisites for integration tests.
 
 The following configuration keys must be set in any code that uses these libraries:
 
-| Environment variable | Description                         | Default | Required for     |
-|----------------------|-------------------------------------|---------|------------------|
-| `REDIS_HOST`         | Redis host                          |         | Redis storage    |
-| `REDIS_PORT`         | Redis port                          |         | Redis storage    |
-| `REDIS_DB`           | Redis DB number                     | 0       | Redis storage    |
-| `S3_KEY`             | AWS Key Id                          |         | S3 storage       | 
-| `S3_SECRET`          | AWS Secret Key                      |         | S3 storage       |
-| `S3_BUCKET_NAME`     | AWS S3 bucket name                  |         | S3 storage       |
-| `S3_REGION_NAME`     | AWS S3 bucket region name           |         | S3 storage       |
-| `STATUS_SERVICE`     | Public URL of the Status service    |         | Status Reporting |
-| `JWT_SECRETS`        | Comma-separated list of JTW Secrets |         | JWT Verification |
-| `ARTIFACT_BASE`      | URL base of Artifact Repository     |         | Artifact         |
+ - GLOBAL_ARTIFACT_URL_BASE
+ - GLOBAL_JWT_SECRETS
+ - GLOBAL_KAFKA_BOOTSTRAP_SERVERS
+ - GLOBAL_STATUS_TOPIC
 
 ## Distribution
 

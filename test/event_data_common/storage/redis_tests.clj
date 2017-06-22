@@ -14,7 +14,9 @@
 (defn build
   "Build Redis storage with config"
   []
-  (redis/build the-prefix (:redis-host env) (Integer/parseInt (:redis-port env)) (Integer/parseInt (get env :redis-db default-db-str))))
+  (redis/build the-prefix (:test-redis-host env)
+                          (Integer/parseInt (:test-redis-port env))
+                          (Integer/parseInt (get env :test-redis-db default-db-str))))
 
 (deftest ^:component incr-key-by
   (testing "Key be incremented and retrieved."

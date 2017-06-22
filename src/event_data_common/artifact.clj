@@ -10,7 +10,7 @@
 (defn fetch-index
   "Retrieve the Artifact index."
   []
-  (let [the-path (str (:artifact-base env) "/a/artifacts.json")]
+  (let [the-path (str (:global-artifact-url-base env) "/a/artifacts.json")]
     (try 
       (try-try-again {:sleep 10000 :tries 10}
          #(let [result (client/get the-path)

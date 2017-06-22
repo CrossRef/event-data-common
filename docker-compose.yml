@@ -8,12 +8,11 @@ services:
     depends_on:
      - redis
     environment:
-     - REDIS_HOST=redis
-     - REDIS_PORT=6379
-     - REDIS_DB=0
-     - STATUS_SERVICE=http://localhost:8003
-     - JWT_SECRETS=TEST,TEST2
-     - ARTIFACT_BASE=http://artifact-test
+     - TEST_REDIS_HOST=redis
+     - TEST_REDIS_PORT=6379
+     - TEST_REDIS_DB=0
+     - GLOBAL_JWT_SECRETS=TEST,TEST2
+     - GLOBAL_ARTIFACT_BASE=http://artifact-test
     command: "lein test"
 
   redis:
