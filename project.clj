@@ -1,8 +1,9 @@
-(defproject event-data-common "0.1.28"
+(defproject event-data-common "0.1.29"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
             :url "https://opensource.org/licenses/MIT"}
+  :plugins [[lein-localrepo "0.5.3"]]
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [clj-time "0.12.2"]
@@ -24,16 +25,7 @@
                  [org.slf4j/slf4j-simple "1.7.21"]
                  [com.auth0/java-jwt "2.2.1"]
                  [com.amazonaws/aws-java-sdk "1.11.61"]
-                 ; Required for AWS, but not fetched.
-                 [org.apache.httpcomponents/httpclient "4.5.2"]
-                 ; https://mvnrepository.com/artifact/org.apache.activemq/activemq-client
-                 [org.apache.activemq/activemq-client "5.14.5"]
-                 ; https://mvnrepository.com/artifact/org.apache.activemq/activemq-broker
-                 [org.apache.activemq/activemq-broker "5.14.5"]
-                 ;; https://mvnrepository.com/artifact/org.apache.activemq/activemq-core
-                 [org.apache.activemq/activemq-core "5.7.0"]
-                 ;; https://mvnrepository.com/artifact/org.apache.activemq/activemq-pool
-                 [org.apache.activemq/activemq-pool "5.14.5"]]
+                 [org.apache.kafka/kafka-clients "0.10.2.0"]]
   :target-path "target/%s"
   :test-selectors {:default (constantly true)
                    :unit :unit

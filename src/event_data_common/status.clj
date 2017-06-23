@@ -5,8 +5,11 @@
             [robert.bruce :refer [try-try-again]]
             [clojure.tools.logging :as log]
             [clj-http.client :as client]
-            [config.core :refer [env]])
-  (:import [java.util UUID]))
+            [config.core :refer [env]]
+            [clojure.data.json :as json])
+  (:import [java.util UUID]
+           [org.apache.kafka.clients.producer KafkaProducer Producer ProducerRecord]
+           [org.apache.kafka.clients.consumer KafkaConsumer Consumer ConsumerRecords]))
 
 (def jwt-auth (delay (jwt/build (:global-jwt-secrets env))))
 
@@ -27,24 +30,31 @@
       (.put properties "value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
       (KafkaProducer. properties))))
 
-(defn add!
-  "Send an update for a component/fragment/heartbeat"
-  [service component fragment heartbeat-count]
-  (.send @kafka-producer
-         (ProducerRecord. (:global-status-topic env)
-                          (str (UUID/randomUUID))
-                          (json/write-str {:service service
-                                           :component component
-                                           :fragment fragment
-                                           :aggregation-type "cumulative"}))))
-
-(defn replace!
-  "Send an update for a component/fragment/heartbeat"
-  [service component fragment heartbeat-count]
-  (.send @kafka-producer
-         (ProducerRecord. (:global-status-topic env)
-                          (str (UUID/randomUUID))
-                          (json/write-str {:service service
-                                           :component component
-                                           :fragment fragment
-                                           :aggregation-type "sampled"}))))
+(defn send!
+  "Send an update for a component/facet/heartbeat.
+   Partition number can be nil.
+   typ is one of:
+    - :event - single shots that should be aggregated to a rate (e.g. retrieval per second)
+    - :snapshot - values that change over time (e.g. current queue length)
+    - :sample - scalar representative values that should all be min/max/averaged (e.g. message size)"
+  ; For recording single-shot events.
+  ([service component facet]
+    (send! service component facet -1 1))
+  ; When there's no partition use default of -1
+  ([service component facet value]
+    (send! service component facet -1 value))
+  ; Include partition.
+  ([service component facet partition-number value]
+    (send! service component facet partition-number value nil))
+  ; All values
+  ([service component facet partition-number value extra]
+    (.send @kafka-producer
+           (ProducerRecord. (:global-status-topic env)
+                            (str (UUID/randomUUID))
+                            (json/write-str {:t (System/currentTimeMillis)
+                                             :s service
+                                             :c component
+                                             :f facet
+                                             :p (or partition-number -1)
+                                             :v value
+                                             :e extra})))))
