@@ -87,7 +87,7 @@ To distribute:
 
 To use use a local repository when developing new functionality against agents:
 
-    lein clean && lein test && lein uberjar && rm -rf ~/.m2/repository/org.crossref & lein localrepo install target/uberjar/event-data-common-0.1.29-SNAPSHOT-standalone.jar event-data-common  "0.1.29-SNAPSHOT"
+    lein clean && lein uberjar && rm -rf ~/.m2/repository/org.crossref && lein localrepo install target/uberjar/event-data-common-0.1.30-SNAPSHOT-standalone.jar event-data-common  "0.1.30-SNAPSHOT"
     
 ## License
 

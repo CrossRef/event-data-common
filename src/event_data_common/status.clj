@@ -48,13 +48,16 @@
     (send! service component facet partition-number value nil))
   ; All values
   ([service component facet partition-number value extra]
-    (.send @kafka-producer
-           (ProducerRecord. (:global-status-topic env)
-                            (str (UUID/randomUUID))
-                            (json/write-str {:t (System/currentTimeMillis)
-                                             :s service
-                                             :c component
-                                             :f facet
-                                             :p (or partition-number -1)
-                                             :v value
-                                             :e extra})))))
+    ; Skip connecting to Kafka if not configured. Used for testing.
+    (if-not (:global-kafka-bootstrap-servers env)
+      (log/debug "Status" service component facet partition-number value extra)
+      (.send @kafka-producer
+             (ProducerRecord. (:global-status-topic env)
+                              (str (UUID/randomUUID))
+                              (json/write-str {:t (System/currentTimeMillis)
+                                               :s service
+                                               :c component
+                                               :f facet
+                                               :p (or partition-number -1)
+                                               :v value
+                                               :e extra}))))))
