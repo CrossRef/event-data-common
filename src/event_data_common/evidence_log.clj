@@ -24,7 +24,7 @@
 (def available-fields
   "Known set of fields that we can log.
   If these are modified, the event-data-evidence-log-snapshot should be updated."
-  #{:s :c :f :p :v :r :d :n :u :e})
+  #{:s :c :f :p :v :d :n :u :r :e :o})
 
 (defn log!
   "Log message as a map of known fields to values to Evidence Log. All fields optional.
@@ -35,11 +35,12 @@
    - :f - facet
    - :p - partition
    - :v - value
-   - :r - Evidence Record ID
    - :d - DOI
    - :n - Event ID
    - :u - URL
-   - :e - extra data"
+   - :r - Evidence Record ID
+   - :e - Result status
+   - :o - Origin"
   [message]
   {:pre [(every? available-fields (keys message))]}
   ; Skip connecting to Kafka if not configured. Used for testing.
