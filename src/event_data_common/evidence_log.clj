@@ -24,7 +24,7 @@
 (def available-fields
   "Known set of fields that we can log.
   If these are modified, the event-data-evidence-log-snapshot should be updated."
-  #{:s :c :f :p :v :d :n :u :r :e :o})
+  #{:s :c :f :p :a :v :d :n :u :r :e :o})
 
 (defn log!
   "Log message as a map of known fields to values to Evidence Log. All fields optional.
@@ -34,6 +34,7 @@
    - :c - component
    - :f - facet
    - :p - partition
+   - :a - Activity ID
    - :v - value
    - :d - DOI
    - :n - Event ID
