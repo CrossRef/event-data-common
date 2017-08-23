@@ -8,23 +8,28 @@
             [config.core :refer [env]]
             [clojure.data.json :as json])
   (:import [java.util UUID]
-           [org.apache.kafka.clients.producer KafkaProducer Producer ProducerRecord]
+           [org.apache.kafka.clients.producer KafkaProducer Producer ProducerRecord Callback RecordMetadata]
            [org.apache.kafka.clients.consumer KafkaConsumer Consumer ConsumerRecords]))
 
 (def kafka-producer
   (delay
-    (let [properties (java.util.Properties.)]
-      (.put properties "bootstrap.servers" (:global-kafka-bootstrap-servers env))
-      (.put properties "acks", "all")
-      (.put properties "retries", (int 5))
-      (.put properties "key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-      (.put properties "value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-      (KafkaProducer. properties))))
+    (KafkaProducer. {
+      "bootstrap.servers" (:global-kafka-bootstrap-servers env)
+      "acks" "all"
+      "retries" (int 5)
+      "key.serializer" "org.apache.kafka.common.serialization.StringSerializer"
+      "value.serializer" "org.apache.kafka.common.serialization.StringSerializer"})))
 
 (def available-fields
   "Known set of fields that we can log.
   If these are modified, the event-data-evidence-log-snapshot should be updated."
   #{:s :c :f :p :a :v :d :n :u :r :e :o :i})
+
+
+(def error-callback (reify Callback
+  (^void onCompletion [this ^RecordMetadata metadata ^Exception exception]
+    (when exception
+      (log/error "Failed to send Evidence Log message" (.getMessage exception))))))
 
 (defn log!
   "Log message as a map of known fields to values to Evidence Log. All fields optional.
@@ -45,11 +50,18 @@
    - :i - Log Message type ID"
   [message]
   {:pre [(every? available-fields (keys message))]}
+
   ; Skip connecting to Kafka if not configured. Used for testing.
   (if-not (:global-kafka-bootstrap-servers env)
     (log/debug "Evidence Log" message)
+
+    ; As this is called with high frequency, allow Kafka's producer to do its asycnronous batching.
+    ; Don't block on send. Instead, handle error and log with callback. 
     (.send @kafka-producer
            (ProducerRecord. (:global-status-topic env)
                             (str (UUID/randomUUID))
                             (json/write-str (assoc message
-                                              :t (System/currentTimeMillis)))))))
+                                              :t (System/currentTimeMillis))))
+           error-callback)))
+
+
