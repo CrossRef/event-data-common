@@ -110,6 +110,10 @@
 (defn build
   "Build a S3Connection object."
   [s3-key s3-secret s3-region-name s3-bucket-name]
+
+  ; Recommended in http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-jvm-ttl.html
+  (java.security.Security/setProperty "networkaddress.cache.ttl" "60")
+
   (let [client (get-aws-client s3-key s3-secret s3-region-name)]
     (S3Connection. client s3-bucket-name)))
 
