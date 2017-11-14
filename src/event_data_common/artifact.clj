@@ -66,3 +66,30 @@
   [artifact-name]
   "Get the content of the latest version of the artifact as a stream."
   (fetch-latest-artifact artifact-name :stream))
+
+
+(defn fetch-content-heuristics
+  "Fetch the latest content-heuristics Artifact.
+   Transform those parts that should be sets into sets.
+   Format is:
+   {:prefixes set-of-prefixes
+    :domains set-of-domains
+    :domain-prefixes {domain set-of-prefixes}"
+  [])
+
+(defn content-heuristics->prefixes
+  "Given content-heuristics artifact content, return a set of DOI prefixes."
+  [input])
+
+(defn content-heuristics->domains
+  "Given content-heuristics artifact content, return a set of domain names."
+  [input])
+
+(def threshold
+  0.2)
+
+(defn content-heuristics->domain-prefix
+  "Given content-heuristics artifact content, return a mapping of {domain: prefix-set}.
+   This records which domains have reliably been seen to report that they contain content that "
+  [input])
+
