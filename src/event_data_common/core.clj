@@ -1,11 +1,8 @@
 (ns event-data-common.core
   (:require [taoensso.timbre :as timbre]
-            [overtone.at-at :as at-at]
             [clojure.tools.logging :as log]
             [clojure.data.json :as json])
   (:gen-class))
-
-(def pool (delay (at-at/mk-pool)))
 
 (defn gigabyte
   [x]
@@ -38,8 +35,14 @@
 (defn start-memory-log
   "Start a scheduled log of memory once a minute."
   []
-  (at-at/every 60000 log-memory @pool))
-    
+  ; Use a simple daemon thread rather than a thread pool so we can be sure that it
+  ; doesn't block the main thread, allowing the process to exit when the normal main method
+  ; exits. Also a thread pool would be pointless as there is exactly one of these.
+  (clojure.core.async/thread
+    (loop []
+      (log-memory)
+      (Thread/sleep 60000)
+      (recur))))
 
 (defn init
   "Initialize common functions.
