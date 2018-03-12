@@ -25,7 +25,7 @@
                                     (let [response (client/get url 
                                          {:query-params
                                           (merge 
-                                            {:mailto "investigator+labs@crossref.org"
+                                            {:mailto "eventdata@crossref.org"
                                              :cursor cursor}
                                             query-params)
                                           :as :stream
