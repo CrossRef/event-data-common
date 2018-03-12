@@ -22,4 +22,6 @@
      (clj-time-format/unparse yyyy-mm-dd-format (clj-time/plus date (clj-time/days 1)))]))
 
 
-
+(defn ->yyyy-mm-dd
+  [date-time]
+  (clj-time-format/unparse yyyy-mm-dd-format date-time))

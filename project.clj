@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.42"
+(defproject event-data-common "0.1.43"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
@@ -26,7 +26,9 @@
                  [yogthos/config "0.8"]
                  [com.fzakaria/slf4j-timbre "0.3.7"]
                  [org.slf4j/slf4j-api "1.7.14"]
-                 [com.taoensso/timbre "4.10.0"]]
+                 [com.taoensso/timbre "4.10.0"]
+                 [cheshire "5.7.0"]
+                 [com.climate/claypoole "1.1.4"]]
   :target-path "target/%s"
   :test-selectors {:default (constantly true)
                    :unit :unit

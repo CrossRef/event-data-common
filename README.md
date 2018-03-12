@@ -75,6 +75,10 @@ The following configuration keys must be set in any code that uses these librari
  - GLOBAL_KAFKA_BOOTSTRAP_SERVERS
  - GLOBAL_STATUS_TOPIC
 
+For the Event Bus:
+
+ - GLOBAL_EVENT_BUS_BASE
+
 ## Distribution
 
 To distribute:
