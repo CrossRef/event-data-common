@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.43"
+(defproject event-data-common "0.1.44"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
@@ -6,13 +6,13 @@
   :plugins [[lein-localrepo "0.5.3"]]
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [clj-http "3.4.1"]
-                 [clj-http-fake "1.0.2"]
+                 [clj-http-fake "1.0.3"]
                  [clj-time "0.12.2"]
                  [com.amazonaws/aws-java-sdk "1.11.61"]
                  [com.auth0/java-jwt "2.2.1"]
                  [compojure "1.5.1"]
                  [liberator "0.14.1"]
-                 [org.apache.kafka/kafka-clients "0.10.2.0"]
+                 [org.apache.kafka/kafka-clients "0.11.0.0"]
                  [org.clojure/core.async "0.2.395"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.logging "0.3.1"]
