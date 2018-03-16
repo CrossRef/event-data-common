@@ -13,6 +13,7 @@ services:
      - TEST_REDIS_DB=0
      - GLOBAL_JWT_SECRETS=TEST,TEST2
      - GLOBAL_ARTIFACT_BASE=http://artifact-test
+     - GLOBAL_EVENT_BUS_BASE=https://bus.eventdata.crossref.org
     command: "lein test"
 
   redis:

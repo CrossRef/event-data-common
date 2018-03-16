@@ -83,3 +83,17 @@
        (cp/pmap 10 (partial event-ids-for-prefix the-date))
        (apply concat)
        set))
+
+(defn get-event
+  "Retrieve an Event by its ID."
+  [event-id]
+  (try-try-again
+    {:sleep 30000 :tries 1}
+    (fn []
+      (let [url (str (:global-event-bus-base env) "/events/" event-id)
+            response (client/get url
+                       {:as :stream
+                        :timeout 900000})]
+          (with-open [body (io/reader (:body response))]
+            (cheshire/parse-stream body keyword))))))
+              
