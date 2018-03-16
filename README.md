@@ -79,6 +79,12 @@ For the Event Bus:
 
  - GLOBAL_EVENT_BUS_BASE
 
+For whitelisting:
+
+ - QUERY_PREFIX_WHITELIST_ARTIFACT_NAME
+ - QUERY_WHITELIST_ARTIFACT_NAME
+ - GLOBAL_ARTIFACT_URL_BASE
+
 ## Distribution
 
 To distribute:

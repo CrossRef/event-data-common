@@ -16,8 +16,12 @@ services:
      - TEST_S3_SECRET=${S3_SECRET}
      - TEST_S3_BUCKET_NAME=${S3_BUCKET_NAME}
      - TEST_S3_REGION_NAME=${S3_REGION_NAME}
-     - GLOBAL_ARTIFACT_URL_BASE=http://d1v52iseus4yyg.cloudfront.net
+     - GLOBAL_ARTIFACT_URL_BASE=https://artifact.eventdata.crossref.org
      - GLOBAL_EVENT_BUS_BASE=https://bus.eventdata.crossref.org
+     - QUERY_PREFIX_WHITELIST_ARTIFACT_NAME=crossref-doi-prefix-list
+     - QUERY_WHITELIST_ARTIFACT_NAME=crossref-sourcelist
+
+
     command: "lein test"
 
   redis:

@@ -14,6 +14,11 @@ services:
      - GLOBAL_JWT_SECRETS=TEST,TEST2
      - GLOBAL_ARTIFACT_BASE=http://artifact-test
      - GLOBAL_EVENT_BUS_BASE=https://bus.eventdata.crossref.org
+     - GLOBAL_ARTIFACT_URL_BASE=https://artifact.eventdata.crossref.org
+     - GLOBAL_EVENT_BUS_BASE=https://bus.eventdata.crossref.org
+     - QUERY_PREFIX_WHITELIST_ARTIFACT_NAME=crossref-doi-prefix-list
+     - QUERY_WHITELIST_ARTIFACT_NAME=crossref-sourcelist
+
     command: "lein test"
 
   redis:
