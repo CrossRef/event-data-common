@@ -6,7 +6,7 @@ Common components for various services of Event Data. Tests run in Docker, but t
 
 ## To use
 
-    [event-data-common "0.1.11"]
+    [event-data-common "0.1.47"]
 
 ## Components
 
