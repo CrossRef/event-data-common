@@ -38,6 +38,10 @@ Various date and time functions, mostly connected to archiving.
 
 Try and re-try functions in a threadpool. For robust connection to external systems.
 
+### Checkpointing
+
+Throttle execution of execution for given functions and arguments. Used by Agents e.g. to only check a given URL every X seconds.
+
 ### Queue
 
 Broadcast and recieve from ActiveMQ queues. Contains sender and listener with thread-local cached connection objects. The queue connection is configured upon construction, so this namespace does not directly use the configuration values.
@@ -84,6 +88,16 @@ For whitelisting:
  - QUERY_PREFIX_WHITELIST_ARTIFACT_NAME
  - QUERY_WHITELIST_ARTIFACT_NAME
  - GLOBAL_ARTIFACT_URL_BASE
+
+For checkpointing
+
+(agent prefix is an accident of history)
+
+ - AGENT_CHECKPOINT_S3_KEY
+ - AGENT_CHECKPOINT_S3_SECRET
+ - AGENT_CHECKPOINT_S3_REGION_NAME
+ - AGENT_CHECKPOINT_S3_BUCKET_NAME
+
 
 ## Distribution
 
