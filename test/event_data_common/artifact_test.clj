@@ -10,32 +10,32 @@
    "artifacts" {"crossref-sourcelist"
                 {"name" "crossref-sourcelist"
                   "current-version" "1481825550368"
-                  "versions-link" "http://d1v52iseus4yyg.cloudfront.net/a/crossref-sourcelist/versions.json"
-                  "current-version-link" "http://d1v52iseus4yyg.cloudfront.net/a/crossref-sourcelist/versions/1481825550368"}
+                  "versions-link" "https://artifact.eventdata.crossref.org/a/crossref-sourcelist/versions.json"
+                  "current-version-link" "https://artifact.eventdata.crossref.org/a/crossref-sourcelist/versions/1481825550368"}
                   
                   "doi-prefix-list"
                  {"name" "doi-prefix-list"
                   "current-version" "1481821349348"
-                  "versions-link" "http://d1v52iseus4yyg.cloudfront.net/a/doi-prefix-list/versions.json"
-                  "current-version-link" "http://d1v52iseus4yyg.cloudfront.net/a/doi-prefix-list/versions/1481821349348"}
+                  "versions-link" "https://artifact.eventdata.crossref.org/a/doi-prefix-list/versions.json"
+                  "current-version-link" "https://artifact.eventdata.crossref.org/a/doi-prefix-list/versions/1481821349348"}
                   
                   "domain-list"
                  {"name" "domain-list"
                   "current-version" "1481821314866"
-                  "versions-link" "http://d1v52iseus4yyg.cloudfront.net/a/domain-list/versions.json"
-                  "current-version-link" "http://d1v52iseus4yyg.cloudfront.net/a/domain-list/versions/1481821314866"}
+                  "versions-link" "https://artifact.eventdata.crossref.org/a/domain-list/versions.json"
+                  "current-version-link" "https://artifact.eventdata.crossref.org/a/domain-list/versions/1481821314866"}
                   
                   "newsfeed-list"
                  {"name" "newsfeed-list"
                   "current-version" "1481821264217"
-                  "versions-link" "http://d1v52iseus4yyg.cloudfront.net/a/newsfeed-list/versions.json"
-                  "current-version-link" "http://d1v52iseus4yyg.cloudfront.net/a/newsfeed-list/versions/1481821264217"}
+                  "versions-link" "https://artifact.eventdata.crossref.org/a/newsfeed-list/versions.json"
+                  "current-version-link" "https://artifact.eventdata.crossref.org/a/newsfeed-list/versions/1481821264217"}
                   
                   "other"
                  {"name" "other"
                   "current-version" "1481820920798"
-                  "versions-link" "http://d1v52iseus4yyg.cloudfront.net/a/other/versions.json"
-                  "current-version-link" "http://d1v52iseus4yyg.cloudfront.net/a/other/versions/1481820920798"}}})
+                  "versions-link" "https://artifact.eventdata.crossref.org/a/other/versions.json"
+                  "current-version-link" "https://artifact.eventdata.crossref.org/a/other/versions/1481820920798"}}})
 
 (def artifact-index-json (json/write-str artifact-index-structure))
 
@@ -43,13 +43,13 @@
   {"type" "artifact-version-list"
    "updated" "2016-12-16T10:19:28.124Z"
    "versions" [
-    {"version-link" "http://d1v52iseus4yyg.cloudfront.net/a/newsfeed-list/versions/1481821264217"
+    {"version-link" "https://artifact.eventdata.crossref.org/a/newsfeed-list/versions/1481821264217"
      "version" "1481821264217"}]
     "artifact" {
       "name" "newsfeed-list"
       "current-version" "1481821264217"
-      "versions-link" "http://d1v52iseus4yyg.cloudfront.net/a/newsfeed-list/versions.json"
-      "current-version-link" "http://d1v52iseus4yyg.cloudfront.net/a/newsfeed-list/versions/1481821264217"}})
+      "versions-link" "https://artifact.eventdata.crossref.org/a/newsfeed-list/versions.json"
+      "current-version-link" "https://artifact.eventdata.crossref.org/a/newsfeed-list/versions/1481821264217"}})
 
 (def artifact-versions-json (json/write-str artifact-versions-structure))
 
@@ -57,13 +57,13 @@
 (deftest ^:unit can-retrieve-artifacts
   (testing "Can succesfully retrieve the list of artifacts."
       (fake/with-global-fake-routes-in-isolation
-        {"http://d1v52iseus4yyg.cloudfront.net/a/artifacts.json"
+        {"https://artifact.eventdata.crossref.org/a/artifacts.json"
          (fn [req]  {:status 200 :headers {} :body artifact-index-json})
          
-         "http://d1v52iseus4yyg.cloudfront.net/a/crossref-sourcelist/versions/1481825550368"
+         "https://artifact.eventdata.crossref.org/a/crossref-sourcelist/versions/1481825550368"
          (fn [req]  {:status 200 :headers {} :body "version 1481825550368 of artifact crossref-sourcelist"})
 
-         "http://d1v52iseus4yyg.cloudfront.net/a/newsfeed-list/versions/1481821264217"
+         "https://artifact.eventdata.crossref.org/a/newsfeed-list/versions/1481821264217"
          (fn [req]  {:status 200 :headers {} :body "version 1481821264217 of artifact newsfeed-list"})}
         
           (is (= (set (artifact/fetch-artifact-names)) #{"crossref-sourcelist" "doi-prefix-list" "domain-list" "newsfeed-list" "other"} ) "List of all artifacts should be retrieved.")

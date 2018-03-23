@@ -33,7 +33,10 @@
 
              (with-redefs [artifact/fetch-latest-artifact-string 
                            (fn [artifact-name]
-                             (is (= (swap! cache-count #(update artifact-name inc)) 1)
+                             (is (= (get
+                                      (swap! cache-count #(update % artifact-name inc))
+                                      artifact-name)
+                                    1)
                                  "Artifact fetch should be called only once during a TTL window.")
 
                              ({"crossref-doi-prefix-list" "10.5555\n10.6666"

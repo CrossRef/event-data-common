@@ -1,5 +1,5 @@
 (ns event-data-common.storage.s3-tests
-  "Component tests for the storage.s3 namespace."
+  "Integration tests for the storage.s3 namespace."
   (:require [clojure.test :refer :all]
             [config.core :refer [env]]
             [event-data-common.storage.s3 :as s3]

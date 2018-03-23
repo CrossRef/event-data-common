@@ -1,5 +1,5 @@
 (ns event-data-common.storage.redis-tests
-  "Component tests for the storage.redis namespace."
+  "Integration tests for the storage.redis namespace."
   (:require [clojure.test :refer :all]
             [clojure.core.async :as async]
             [config.core :refer [env]]
@@ -18,7 +18,7 @@
                           (Integer/parseInt (:test-redis-port env))
                           (Integer/parseInt (get env :test-redis-db default-db-str))))
 
-(deftest ^:component incr-key-by
+(deftest ^:integration incr-key-by
   (testing "Key be incremented and retrieved."
     (let [k "key-to-increment"
           ; build a redis connection with the present configuration.
@@ -33,7 +33,7 @@
 
       (is (= "18" (store/get-string conn k)) "New number can be retrieved"))))
 
-(deftest ^:component set-and-get
+(deftest ^:integration set-and-get
   (testing "Key can be set and retrieved."
     (let [k "this is my key"
           v "this is my value"
@@ -42,7 +42,7 @@
       (store/set-string conn k v)
       (is (= v (store/get-string conn k)) "Correct value returned"))))
 
-(deftest ^:component set-delete-and-get
+(deftest ^:integration set-delete-and-get
   (testing "Key can be set and deleted retrieved."
     (let [k "this is my key2"
           v "this is my value2"
@@ -59,7 +59,7 @@
 
       (is (nil? (store/get-string conn k)) "Key should not exist after deletion."))))
 
-(deftest ^:component setex-and-get-ms
+(deftest ^:integration setex-and-get-ms
   (testing "Key can be set with expiry millseconds and retrieved."
     (let [ki "this is my immediately expiring key"
           kl "this is my long expiring key"
@@ -78,7 +78,7 @@
       (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
       (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
 
-(deftest ^:component setex-and-get-seconds
+(deftest ^:integration setex-and-get-seconds
   (testing "Key can be set with expiry seconds and retrieved."
     (let [ki "this is my immediately expiring key"
           kl "this is my long expiring key"
@@ -97,7 +97,7 @@
       (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
       (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
 
-(deftest ^:component expire-seconds!
+(deftest ^:integration expire-seconds!
   (testing "Key expires after given number of seconds"
     (let [ki "this is my immediately expiring key"
           kl "this is my long expiring key"
@@ -119,7 +119,7 @@
       (is (= nil (store/get-string conn ki)) "Expired value should not be returned")
       (is (= vl (store/get-string conn kl)) "Long expiring value should be returned"))))
 
-(deftest ^:component keys-matching-prefix
+(deftest ^:integration keys-matching-prefix
   (testing "All keys matching prefix should be returned."
     ; Insert 10,000 keys that we do want to match and 10,000 that we don't.
     (let [conn (build)
@@ -148,7 +148,7 @@
 
 ; Redis interface
 
-(deftest ^:component expiring-mutex
+(deftest ^:integration expiring-mutex
   (testing "Expiring mutex can only be set once in expiry time.")
   (let [conn (build)
         k "my key"]
@@ -170,7 +170,7 @@
    (when-let [v (async/<!! c)]
      (cons v (seq!! c)))))
 
-(deftest ^:component pub-sub
+(deftest ^:integration pub-sub
   (testing "Published events are broadcast to all listeners."
     (let [conn1 (build)
           conn2 (build)
@@ -211,7 +211,7 @@
       (is (= message-2 (async/<!! chan-2)) "Channel 1 should have message 2 twice")
       (is (= #{message-1 message-2} (set (take 2 (seq!! chan-both)))) "Channel 3 should have both messages"))))
 
-(deftest ^:component sets
+(deftest ^:integration sets
   (testing "Can add to sets and iterate over them."
     (let [set-name "MY_SET"
           conn (build)
@@ -232,7 +232,7 @@
 
       (is (= (redis/set-members conn set-name) (clojure.set/union first-keys second-keys)) "All keys should have been added from second set, keeping unique members."))))
 
-(deftest ^:component sorted-sets
+(deftest ^:integration sorted-sets
   (testing "Can put and increment to sorted sets and iterate over them."
     (let [set-name "MY_SORTED_SET"
           conn (build)

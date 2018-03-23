@@ -9,10 +9,16 @@
 
 (def yyyy-mm-dd-format (clj-time-format/formatter "yyyy-MM-dd"))
 
-(defn back-days
-  "Generate a sequence of days back in history from today."
+(defn back-dates
+  "Generate a sequence of days back in history from given date as clj-time ."
   [date days]
-  (map #(clj-time-format/unparse yyyy-mm-dd-format (clj-time/minus date (clj-time/days %))) (range 0 days)))
+  (map #(clj-time/minus date (clj-time/days %)) (range 0 days)))
+
+(defn back-days
+  "Generate a sequence of days back in history from given date as YYYY-MM-DD strings."
+  [date days]
+  (map (partial clj-time-format/unparse yyyy-mm-dd-format)
+       (back-dates date days)))
 
 (defn adjacent-days
   "Given a date-str, return a tuple of [day-before, day-after]"
