@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.47"
+(defproject event-data-common "0.1.48"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"
@@ -30,7 +30,7 @@
                  [cheshire "5.7.0"]
                  [com.climate/claypoole "1.1.4"]
                  [org.clojure/core.cache "0.7.1"]
-                 [crossref-util "0.1.14"]]
+                 [crossref-util "0.1.15"]]
   :target-path "target/%s"
   :test-selectors {:default (constantly true)
                    :unit :unit
