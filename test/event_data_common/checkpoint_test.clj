@@ -190,3 +190,19 @@
 
                         (is (= 2 @flag) "Function should have not been run again as there was a recent run."))))))
 
+
+(deftest ^:unit run-once-checkpointed
+  (testing "run-once-checkpointed should only run the function once ever."
+    (with-redefs [checkpoint/checkpoint-store (delay (memory/build))]
+      (let [identifier ["reddit" "domain" "xyz.com"]
+            flag (atom 0)]
+
+        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
+
+        ; These should be ignored.
+        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
+        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
+        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
+
+        (is (= 1 @flag) "Function should have been run once")))))
+

@@ -124,3 +124,25 @@
 
       (set-checkpoint! identifier starting-time))))
 
+
+(defn run-once-checkpointed!
+  "Run the supplied function with checkpoint identifier only once, ever."
+  [identifier function]
+
+  ; This may be long-running. Checkpoint the time we started the activity, not the time we finished.
+  (let [starting-time (clj-time/now)
+        last-checkpoint-date (get-checkpoint identifier)]
+
+    (when-not last-checkpoint-date
+      (log/info "Checkpoint running" identifier "once only.")
+
+      ; This is often called directly in a pmap, where the threadpool can swallow exceptions.
+      (try
+        (function last-checkpoint-date)
+
+        (catch Exception ex
+          (do (log/error "Error processing" function "with checkpoint" identifier)
+              (.printStackTrace ex))))
+
+      (set-checkpoint! identifier starting-time))))
+
