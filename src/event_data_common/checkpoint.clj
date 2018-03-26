@@ -138,7 +138,7 @@
 
       ; This is often called directly in a pmap, where the threadpool can swallow exceptions.
       (try
-        (function last-checkpoint-date)
+        (function)
 
         (catch Exception ex
           (do (log/error "Error processing" function "with checkpoint" identifier)

@@ -197,12 +197,12 @@
       (let [identifier ["reddit" "domain" "xyz.com"]
             flag (atom 0)]
 
-        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
+        (checkpoint/run-once-checkpointed! identifier (fn [] (swap! flag inc)))
 
         ; These should be ignored.
-        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
-        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
-        (checkpoint/run-once-checkpointed! identifier (fn [_] (swap! flag inc)))
+        (checkpoint/run-once-checkpointed! identifier (fn [] (swap! flag inc)))
+        (checkpoint/run-once-checkpointed! identifier (fn [] (swap! flag inc)))
+        (checkpoint/run-once-checkpointed! identifier (fn [] (swap! flag inc)))
 
         (is (= 1 @flag) "Function should have been run once")))))
 
