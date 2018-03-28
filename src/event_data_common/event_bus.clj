@@ -37,7 +37,7 @@
   [the-date prefix callback]
   (let [date-str (date/->yyyy-mm-dd the-date)]
     (try-try-again
-      {:sleep 30000 :tries 5}
+      {:sleep 60000 :tries 10}
       (fn []
         (log/info "Try" date-str prefix)
         (let [url (str (:global-event-bus-base env) "/events/archive/" date-str "/" prefix)
@@ -62,7 +62,7 @@
   [the-date prefix]
   (let [date-str (date/->yyyy-mm-dd the-date)]
     (try-try-again
-      {:sleep 30000 :tries 5}
+      {:sleep 60000 :tries 10}
       (fn []
         (log/info "Try" date-str prefix)
         (let [url (str (:global-event-bus-base env) "/events/archive/" date-str "/" prefix "/ids")
@@ -88,7 +88,7 @@
   "Retrieve an Event by its ID."
   [event-id]
   (try-try-again
-    {:sleep 30000 :tries 1}
+    {:sleep 60000 :tries 10}
     (fn []
       (let [url (str (:global-event-bus-base env) "/events/" event-id)
             response (client/get url

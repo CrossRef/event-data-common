@@ -1,4 +1,4 @@
-(defproject event-data-common "0.1.51"
+(defproject event-data-common "0.1.52"
   :description "Crossref Event Data Common"
   :url "http://eventdata.crossref.org"
   :license {:name "The MIT License (MIT)"

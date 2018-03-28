@@ -15,7 +15,7 @@
   [endpoint query-params]
   (let [url (str url endpoint)
         body (try-try-again
-               {:sleep 60000 :tries 1}
+               {:sleep 60000 :tries 10}
                   (fn []
                     (log/debug "Try url" url "query" query-params)
                     (let [response (client/get url 
