@@ -97,3 +97,12 @@
           (with-open [body (io/reader (:body response))]
             (cheshire/parse-stream body keyword))))))
               
+(defn send-event
+  [event jwt]
+  (try-try-again
+      {:sleep 60000 :tries 10}
+      (fn []
+        @(http/put (str (:global-event-bus-base env) "/events/" (:id event))
+           {:body (json/write-str event)
+            :headers {"Authorization" (str "Bearer " jwt)}}))))
+
