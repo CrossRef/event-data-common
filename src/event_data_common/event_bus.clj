@@ -13,7 +13,8 @@
             [clj-http.client :as client]
             [clojure.java.io :as io]
             [event-data-common.jwt :as jwt]
-            [com.climate.claypoole :as cp]))
+            [com.climate.claypoole :as cp]
+            [clojure.data.json :as json]))
 
 (def jwt-verifier
   (delay (jwt/build (:global-jwt-secrets env))))
@@ -102,7 +103,7 @@
   (try-try-again
       {:sleep 60000 :tries 10}
       (fn []
-        @(http/put (str (:global-event-bus-base env) "/events/" (:id event))
-           {:body (json/write-str event)
-            :headers {"Authorization" (str "Bearer " jwt)}}))))
+        (client/put (str (:global-event-bus-base env) "/events/" (:id event))
+        {:body (json/write-str event)
+         :headers {"Authorization" (str "Bearer " jwt)}}))))
 
