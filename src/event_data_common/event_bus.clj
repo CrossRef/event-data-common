@@ -14,7 +14,8 @@
             [clojure.java.io :as io]
             [event-data-common.jwt :as jwt]
             [com.climate.claypoole :as cp]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [slingshot.slingshot :refer [throw+ try+]]))
 
 (def jwt-verifier
   (delay (jwt/build (:global-jwt-secrets env))))
