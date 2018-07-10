@@ -99,6 +99,7 @@
             (cheshire/parse-stream body keyword))))))
               
 (defn send-event
+  "Update an extant Event."
   [event jwt]
   (try-try-again
       {:sleep 60000 :tries 10}
@@ -106,4 +107,40 @@
         (client/put (str (:global-event-bus-base env) "/events/" (:id event))
         {:body (json/write-str event)
          :headers {"Authorization" (str "Bearer " jwt)}}))))
+
+
+(defn jwt-for-source
+  "Create a JWT that can "
+  [source-id]
+  (jwt/sign @jwt-verifier {"sub" source-id}))
+
+(def jwt-for-source-cached
+  (memoize jwt-for-source))
+
+(defn post-event
+  "Send an Event to the Bus. Derive an appropriate JWT. Ignore duplicates.
+   Since this may potentially be called more than once with the same Event, it's OK to get a 409 duplicate."
+  [event]
+  (let [jwt (-> event :source_id jwt-for-source-cached)]
+  
+    (try-try-again
+      {:sleep 60000 :tries 10}
+      (fn []
+        (log/debug "Send event id" (:id event))
+
+        (try+ 
+          (prn 1)
+          (client/post (str (:global-event-bus-base env) "/events")
+            {:body (json/write-str event)
+             :headers {"Authorization" (str "Bearer " jwt)}
+             :throw-exceptions true})
+
+           ; Duplicates are fine.
+           (catch [:status 409] {:keys [request-time headers body]}
+             (log/debug "Event ID " (:id event) "was duplicated, ignoring."))
+
+           ; Anything else isn't.
+           (catch Object ex
+             (log/debug "Event ID " (:id event) "failed to send...")
+             (throw+)))))))
 
