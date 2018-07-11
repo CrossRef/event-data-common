@@ -33,13 +33,18 @@
 
 (def prefixes (event-bus-prefixes-length prefix-length))
 
+(def retry-delay
+  "Time to sleep between unsuccessful HTTP requests.
+   Configurable for tests."
+  60000)
+
 (defn retrieve-events-for-date-prefix
   "Retrieve a realized list of Events for this date and prefix of the archive, keywords for keys.
    Calback with lazy seq for flexibility."
   [the-date prefix callback]
   (let [date-str (date/->yyyy-mm-dd the-date)]
     (try-try-again
-      {:sleep 60000 :tries 10}
+      {:sleep retry-delay :tries 10}
       (fn []
         (log/info "Try" date-str prefix)
         (let [url (str (:global-event-bus-base env) "/events/archive/" date-str "/" prefix)
@@ -64,7 +69,7 @@
   [the-date prefix]
   (let [date-str (date/->yyyy-mm-dd the-date)]
     (try-try-again
-      {:sleep 60000 :tries 10}
+      {:sleep retry-delay :tries 10}
       (fn []
         (log/info "Try" date-str prefix)
         (let [url (str (:global-event-bus-base env) "/events/archive/" date-str "/" prefix "/ids")
@@ -90,7 +95,7 @@
   "Retrieve an Event by its ID."
   [event-id]
   (try-try-again
-    {:sleep 60000 :tries 10}
+    {:sleep retry-delay :tries 10}
     (fn []
       (let [url (str (:global-event-bus-base env) "/events/" event-id)
             response (client/get url
@@ -103,7 +108,7 @@
   "Update an extant Event."
   [event jwt]
   (try-try-again
-      {:sleep 60000 :tries 10}
+      {:sleep retry-delay :tries 10}
       (fn []
         (client/put (str (:global-event-bus-base env) "/events/" (:id event))
         {:body (json/write-str event)
@@ -125,12 +130,11 @@
   (let [jwt (-> event :source_id jwt-for-source-cached)]
   
     (try-try-again
-      {:sleep 60000 :tries 10}
+      {:sleep retry-delay :tries 10}
       (fn []
         (log/debug "Send event id" (:id event))
 
         (try+ 
-          (prn 1)
           (client/post (str (:global-event-bus-base env) "/events")
             {:body (json/write-str event)
              :headers {"Authorization" (str "Bearer " jwt)}
