@@ -1,0 +1,41 @@
+{
+  "domains" : [ "www.xyz.net", "www.example.com", "www.zombo.com" ],
+  "prefixes" : [ "10.5555", "10.6666", "10.7777" ],
+  "domains-prefixes" : {
+    "psychoceramics.labs.crossref.org": {
+      "10.5555" : {
+        "domain-recognised" : true,
+        "domain-confirmed" : true
+      }
+    },
+    "www.crossref.org": {
+      "10.13003" : {
+        "domain-recognised" : true,
+        "domain-confirmed" : false
+      }
+    },
+    
+    "www.xyz.net" : {
+      "10.5555" : {
+        "domain-recognised" : true,
+        "domain-confirmed" : true
+      }
+    },
+    "www.example.com" : {
+      "10.5555" : {
+        "domain-recognised" : true,
+        "domain-confirmed" : true
+      }
+    },
+    "www.zombo.com" : {
+      "10.7777" : {
+        "domain-recognised" : true,
+        "domain-confirmed" : false
+      },
+      "10.7777" : {
+        "domain-recognised" : true,
+        "domain-confirmed" : true
+      }
+    }
+  }
+}
