@@ -34,6 +34,8 @@
     ; remain strings.
     (assoc "domains-prefixes" (get input "domains-prefixes"))))
 
+(def artifact-name "domain-decision-structure")
+
 (defn retrieve-domain-decision-structure
   "Return tuple of [version-url, domain-decision-structure]"
   []
@@ -41,9 +43,9 @@
 
   ; Fetch the cached copy of the domain list.
   ; This is quite heavy, weighing in at ~3 MB of serialized JSON. But it stays resident in memory and is heavily used.
-  (let [version-url (artifact/fetch-latest-version-link "domain-decision-structure")
+  (let [version-url (artifact/fetch-latest-version-link artifact-name)
 
-        value (-> version-url
+        value (-> artifact-name
                   artifact/fetch-latest-artifact-stream
                   clojure.java.io/reader
                   ; Explicitly get keys back as strings.
