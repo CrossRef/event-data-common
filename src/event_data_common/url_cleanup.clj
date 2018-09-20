@@ -49,7 +49,9 @@
                       (.build))]
       (str new-uri))
 
+    ; This can happen because the URL isn't a vailid URI, e.g. illegal chars in fragment.
+    ; No big deal, this is best-effort. 
     (catch Exception ex
       (do
-        (log/error "Failed to remove tracking params" url)
+        (log/info "Failed to remove tracking params" url)
         url))))

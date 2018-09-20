@@ -15,7 +15,9 @@
   (delay
     (KafkaProducer. {
       "bootstrap.servers" (:global-kafka-bootstrap-servers env)
-      "acks" "all"
+      ; Make sure it's flushed on the broker, but don't wait for all replicas.
+      ; This is more robust if one replica stops working.
+      "acks" "1"
       "retries" (int 5)
       "key.serializer" "org.apache.kafka.common.serialization.StringSerializer"
       "value.serializer" "org.apache.kafka.common.serialization.StringSerializer"})))
